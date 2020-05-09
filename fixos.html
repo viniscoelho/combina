@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script type="text/javascript" src="combina.js"></script>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/default.css">
+    <title>CombinaJogos v2.0</title>
+  </head>
+
+  <body onload="GenerateFixTable();">
+    <form id="combinaSel" action="">
+      <div class="div-table">
+        <div class="div-table-row">
+          <div class="InnerTextWide div-table-col-c">
+            <strong>Selecione os números fixos:</strong>
+            <table data-toggle="table" class="table" id="tabelaNumeros">
+            </table>
+          </div>
+          <div id="six" class="div-table-col-d">
+            <ul class="Styled" id="numFixosSelecionados">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="div-table">
+        <div class="div-table-row">
+          <div class="InnerTextWide div-table-col-c">
+            <strong>Selecione os números mais sorteados:</strong>
+            <table data-toggle="table" class="table" id="tabelaNumerosMais">
+            </table>
+          </div>
+          <div id="quad" class="div-table-col-d">
+            <ul class="Styled" id="numSorteadosSelecionados">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="buttons">
+          <button type="button" class="btn btn-default" onclick="clearBox('tabelaJogos'); GenerateJogos();">Ok</button>
+          <button type="reset" class="btn btn-default" onclick="clearBox('numFixosSelecionados'); clearBox('numSorteadosSelecionados'); clearBox('tabelaJogos');">Reset</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="InnerTextWide">
+      <strong>Jogos gerados</strong>
+      <table data-toggle="table" class="table" id="tabelaJogos">
+      </table>
+    </div>
+  </body>
+</html>

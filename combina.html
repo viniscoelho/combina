@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script type="text/javascript" src="combina.js"></script>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/default.css">
+    <title>CombinaJogos v2.0</title>
+  </head>
+
+  <body onload="Initialize();">
+    <form id="combinaOpt" action="fixos.html" method="GET" onsubmit="return Validate();">
+      <div class="div-table">
+        <div id="numJogos" class="div-table-row">
+          <div class="div-table-col-a">
+            <strong>Selecione a quantidade de jogos:</strong>
+          </div>
+          <div class="div-table-col-b">
+            <select id="jogos" name="numJogos" class="form-control RightOriented">
+              <option></option>
+            </select>
+          </div>
+        </div>
+
+        <div id="numFixos" class="div-table-row">
+          <div class="div-table-col-a">
+            <strong>Selecione a quantidade de números fixos:</strong>
+          </div>
+          <div class="div-table-col-b">
+            <select id="fixos" name="numFixos" class="form-control input-medium RightOriented">
+              <option></option>
+            </select>
+          </div>
+        </div>
+
+        <div id="numSorteados" class="div-table-row">
+          <div class="div-table-col-a">
+            <strong>Selecione a quantidade de números mais sorteados:</strong>
+          </div>
+          <div class="div-table-col-b">
+            <select id="sorteados" name="numSorteados" class="form-control input-medium RightOriented">
+              <option></option>
+            </select>
+          </div>
+        </div>
+
+        <div id="numOutros" class="div-table-row">
+          <div class="div-table-col-a">
+            <strong>Selecione a quantidade de números menos sorteados:</strong>
+          </div>
+          <div class="div-table-col-b">
+            <select id="outros" name="numOutros" class="form-control input-medium RightOriented">
+              <option></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button type="submit" class="btn btn-danger">Ok</button>
+          <button type="reset" class="btn btn-default">Reset</button>
+        </div>
+      </div>
+    </form>
+  </body>
+</html>
