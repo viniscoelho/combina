@@ -11,10 +11,10 @@ import (
 func CreateRoutes(cb types.Combination) *mux.Router {
 	r := mux.NewRouter()
 
-	// r.Path("/combinations").
-	// 	Methods(http.MethodGet).
-	// 	Name("ListCombinations").
-	// 	Handler(routes.NewListCombinationsHandler(cb))
+	r.Path("/combinations").
+		Methods(http.MethodGet).
+		Name("ListCombinations").
+		Handler(routes.NewListComboHandler(cb))
 	r.Path("/combinations").
 		Methods(http.MethodPost).
 		Name("CreateCombination").
