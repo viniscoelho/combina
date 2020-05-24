@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 
 	"github.com/combina/src/db"
 	"github.com/combina/src/storage/types"
+	"github.com/jackc/pgx/v4"
 )
 
 type lottoBacked struct {
@@ -52,15 +52,38 @@ func (lb *lottoBacked) initializeLottoBacked() error {
 }
 
 func (lb lottoBacked) ListCombinations(gameType string) ([]types.Lotto, error) {
-	ll := make([]types.Lotto, 0)
-	for _, cur := range lb.storage {
-		if gameType != "" && cur.GameType == gameType {
-			ll = append(ll, cur)
+	if _, ok := types.Games[gameType]; !ok && gameType != "" {
+		return nil, types.GameTypeDoesNotExistError{}
+	}
+
+	conn, err := db.DatabaseConnect(types.DatabaseName)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	var rows pgx.Rows
+	if gameType != "" {
+		rows, err = conn.Query(context.Background(), "SELECT * FROM lotto WHERE	type = $1 ORDER BY created_on DESC", gameType)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		rows, err = conn.Query(context.Background(), "SELECT * FROM lotto ORDER BY created_on DESC")
+		if err != nil {
+			return nil, err
 		}
 	}
-	sort.Slice(ll, func(i, j int) bool {
-		return ll[i].CreatedOn.UnixNano() > ll[j].CreatedOn.UnixNano()
-	})
+
+	ll := make([]types.Lotto, 0)
+	for rows.Next() {
+		lotto := types.Lotto{}
+		if err = rows.Scan(&lotto.ID, &lotto.GameType, &lotto.Numbers, &lotto.CreatedOn, &lotto.Alias); err != nil {
+			return nil, err
+		}
+
+		ll = append(ll, lotto)
+	}
 
 	return ll, nil
 }

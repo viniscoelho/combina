@@ -17,8 +17,7 @@ import (
 // quina: premios 3, 4, 5
 // mega: premios 4, 5, 6
 var (
-	gameTypes = map[string]int{"Lotofacil": 25, "Lotomania": 100, "Quina": 80, "Mega-Sena": 60, "Quina-Brasil": 80, "Seninha": 60}
-	exists    = struct{}{}
+	exists = struct{}{}
 )
 
 // isNumEachWithinRange validates if the amount of picked numbers
@@ -107,7 +106,7 @@ func validateLottoDTO(dto types.LottoInputDTO) error {
 		return types.MissingFieldsError{}
 	}
 
-	if _, ok := gameTypes[*dto.GameType]; !ok {
+	if _, ok := types.Games[*dto.GameType]; !ok {
 		return types.InvalidDTOError{Message: "invalid game type"}
 	}
 
@@ -123,11 +122,11 @@ func validateLottoDTO(dto types.LottoInputDTO) error {
 		return types.InvalidDTOError{Message: "amount of picked numbers should be within a valid range"}
 	}
 
-	if !isValidFixedNumbers(gameTypes[*dto.GameType], dto.FixedNumbers) {
+	if !isValidFixedNumbers(types.Games[*dto.GameType], dto.FixedNumbers) {
 		return types.InvalidDTOError{Message: "some fixed numbers are invalid -- choose numbers within a valid range"}
 	}
 
-	if !isValidNumGames(int64(*dto.NumGames), gameTypes[*dto.GameType], *dto.NumEachGame, len(dto.FixedNumbers)) {
+	if !isValidNumGames(int64(*dto.NumGames), types.Games[*dto.GameType], *dto.NumEachGame, len(dto.FixedNumbers)) {
 		return types.InvalidDTOError{Message: "number of games is invalid -- use another value or change the amount of fixed numbers"}
 	}
 
@@ -152,7 +151,7 @@ func newLottoCombination(dto types.LottoInputDTO) types.Lotto {
 	numGames := *dto.NumGames
 	numFixed := len(fixed)
 	numPicked := *dto.NumEachGame
-	maxValue := gameTypes[*dto.GameType]
+	maxValue := types.Games[*dto.GameType]
 	maxRepeated := ((numPicked-numFixed)*numGames)/(maxValue-numFixed) + 1
 
 	if ((numPicked-numFixed)*numGames)%(maxValue-numFixed) != 0 {
