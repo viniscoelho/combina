@@ -9,19 +9,34 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type readCombo struct {
+type evalCombo struct {
 	cb types.Combination
 }
 
-func NewReadComboHandler(cb types.Combination) *readCombo {
-	return &readCombo{cb}
+func NewEvaluateComboHandler(cb types.Combination) *evalCombo {
+	return &evalCombo{cb}
 }
 
-func (h readCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (h evalCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	targetID := vars[idRouteVar]
 
-	lotto, err := h.cb.ReadCombination(targetID)
+	// alternative w/ long url: ?values=1&values2...
+	// r.ParseForm()
+	// values := r.Form["values"]
+
+	// alternative w/ one param as string: ?values=[1,2,...]
+	queryValues := r.FormValue("values")
+	var values []int
+	err := json.Unmarshal([]byte(queryValues), &values)
+	if err != nil {
+		log.Printf("An error occured: %s", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte("internal server error"))
+		return
+	}
+
+	result, err := h.cb.EvaluateCombination(targetID, values)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 
@@ -37,7 +52,7 @@ func (h readCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, err := json.Marshal(lotto)
+	content, err := json.Marshal(result)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)

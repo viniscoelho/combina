@@ -27,10 +27,10 @@ func CreateRoutes(cb types.Combination) *mux.Router {
 		Methods(http.MethodDelete).
 		Name("DeleteCombination").
 		Handler(routes.NewDeleteComboHandler(cb))
-	// r.Path("/combinations/evaluate/{id}").
-	// 	Methods(http.MethodGet).
-	// 	Name("EvaluateCombination").
-	// 	Handler(routes.NewEvaluateCombinationHandler(cb))
+	r.Path("/combinations/evaluate/{id}").
+		Methods(http.MethodGet).
+		Name("EvaluateCombination").
+		Handler(routes.NewEvaluateComboHandler(cb))
 
 	return r
 }

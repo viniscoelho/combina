@@ -12,6 +12,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const idRouteVar = "id"
+
 // lotofacil: premios 11, ..., 15
 // lotomania: premios 0, 15, ..., 20
 // quina: premios 3, 4, 5

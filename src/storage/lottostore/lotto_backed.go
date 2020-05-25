@@ -142,3 +142,29 @@ func (lb *lottoBacked) DeleteCombination(id string) error {
 	delete(lb.storage, id)
 	return nil
 }
+
+func (lb lottoBacked) EvaluateCombination(id string, results []int) (map[int]int, error) {
+	l, ok := lb.storage[id]
+	if !ok {
+		return nil, types.CombinationDoesNotExistError{}
+	}
+
+	lookup := make(map[int]bool)
+	for _, r := range results {
+		lookup[r] = true
+	}
+
+	ans := make(map[int]int)
+	for i := 0; i < l.Numbers.Rows; i++ {
+		var count int
+		for j := 0; j < l.Numbers.Columns; j++ {
+			num := l.Numbers.Combination[i][j]
+			if _, ok := lookup[num]; ok {
+				count++
+			}
+		}
+		ans[count]++
+	}
+
+	return ans, nil
+}
