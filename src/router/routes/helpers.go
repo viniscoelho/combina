@@ -14,10 +14,6 @@ import (
 
 const idRouteVar = "id"
 
-// lotofacil: premios 11, ..., 15
-// lotomania: premios 0, 15, ..., 20
-// quina: premios 3, 4, 5
-// mega: premios 4, 5, 6
 var (
 	exists = struct{}{}
 )
@@ -236,7 +232,7 @@ func generateValidGame(numPicked, maxValue, maxRepeated int, fixedNumbers map[in
 		}
 		generated[hashedNumbers] = exists
 
-		// establish that these chosen numbers were used
+		// count that these chosen numbers were used
 		for i := range numbers {
 			repeated[numbers[i]]++
 		}
