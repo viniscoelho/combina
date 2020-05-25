@@ -43,7 +43,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateLottoDTO(newDTO)
+	err = validateInputDTO(newDTO)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 

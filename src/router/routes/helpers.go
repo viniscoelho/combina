@@ -99,7 +99,7 @@ func isValidNumGames(numGames int64, maxValue, numPicked, numFixed int) bool {
 	return true
 }
 
-func validateLottoDTO(dto types.LottoInputDTO) error {
+func validateInputDTO(dto types.LottoInputDTO) error {
 	if dto.NumGames == nil || dto.NumEachGame == nil || dto.GameType == nil {
 		return types.MissingFieldsError{}
 	}
@@ -180,7 +180,7 @@ func newLottoCombination(dto types.LottoInputDTO) types.Lotto {
 	}
 }
 
-// getShuffledNumbers returns a slice of a shuffled array containing
+// generateCombination returns a slice of a shuffled array containing
 // valid numbers for a combination
 func generateCombination(numPicked, maxValue, maxRepeated int, fixedNumbers map[int]struct{}, generated map[string]struct{}, repeated map[int]int) []int {
 	lo, hi := 1, maxValue
