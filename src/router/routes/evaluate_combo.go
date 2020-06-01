@@ -10,10 +10,10 @@ import (
 )
 
 type evalCombo struct {
-	cb types.Combination
+	cb types.LottoCombinator
 }
 
-func NewEvaluateComboHandler(cb types.Combination) *evalCombo {
+func NewEvaluateComboHandler(cb types.LottoCombinator) *evalCombo {
 	return &evalCombo{cb}
 }
 

@@ -10,10 +10,10 @@ import (
 )
 
 type readCombo struct {
-	cb types.Combination
+	cb types.LottoCombinator
 }
 
-func NewReadComboHandler(cb types.Combination) *readCombo {
+func NewReadComboHandler(cb types.LottoCombinator) *readCombo {
 	return &readCombo{cb}
 }
 

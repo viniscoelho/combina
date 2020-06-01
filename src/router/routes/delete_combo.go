@@ -9,10 +9,10 @@ import (
 )
 
 type deleteCombo struct {
-	cb types.Combination
+	cb types.LottoCombinator
 }
 
-func NewDeleteComboHandler(cb types.Combination) *deleteCombo {
+func NewDeleteComboHandler(cb types.LottoCombinator) *deleteCombo {
 	return &deleteCombo{cb}
 }
 

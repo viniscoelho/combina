@@ -10,10 +10,10 @@ import (
 )
 
 type createCombo struct {
-	cb types.Combination
+	cb types.LottoCombinator
 }
 
-func NewCreateComboHandler(cb types.Combination) *createCombo {
+func NewCreateComboHandler(cb types.LottoCombinator) *createCombo {
 	return &createCombo{cb}
 }
 
@@ -34,8 +34,8 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newDTO := types.LottoInputDTO{}
-	err = json.Unmarshal(body, &newDTO)
+	newInputDTO := types.LottoInputDTO{}
+	err = json.Unmarshal(body, &newInputDTO)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -43,7 +43,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateInputDTO(newDTO)
+	err = validateInputDTO(newInputDTO)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 
@@ -59,7 +59,14 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lotto := newLottoCombination(newDTO)
+	var rgg types.RandomGameGenerator
+	if len(newInputDTO.MostSortedNumbers) != 0 {
+		rgg = types.NewMostSortedShuffle(newInputDTO)
+	} else {
+		rgg = types.NewRandomGameGenerator(newInputDTO)
+	}
+
+	lotto := rgg.GenerateLottoCombination()
 	err = h.cb.CreateCombination(lotto)
 	if err != nil {
 		log.Printf("An error occured: %s", err)

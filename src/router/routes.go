@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CreateRoutes(cb types.Combination) *mux.Router {
+func CreateRoutes(cb types.LottoCombinator) *mux.Router {
 	r := mux.NewRouter()
 
 	r.Path("/combinations").

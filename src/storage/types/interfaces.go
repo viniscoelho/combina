@@ -4,11 +4,12 @@ package types
 import "time"
 
 type LottoInputDTO struct {
-	NumGames     *int    `json:"num_games"`
-	NumEachGame  *int    `json:"num_each"`
-	FixedNumbers []int   `json:"fixed_numbers"`
-	GameType     *string `json:"game_type"`
-	Alias        *string `json:"alias"`
+	NumGames          *int    `json:"num_games"`
+	NumEachGame       *int    `json:"num_each"`
+	FixedNumbers      []int   `json:"fixed_numbers"`
+	MostSortedNumbers []int   `json:"most_sorted,omitempty"`
+	GameType          *string `json:"game_type"`
+	Alias             *string `json:"alias"`
 }
 
 type Lotto struct {
@@ -25,10 +26,16 @@ type GameCombo struct {
 	Columns     int     `json:"cols"`
 }
 
-type Combination interface {
+type LottoCombinator interface {
 	ListCombinations(gameType string) ([]Lotto, error)
 	CreateCombination(lotto Lotto) error
 	ReadCombination(id string) (Lotto, error)
 	DeleteCombination(id string) error
 	EvaluateCombination(id string, results []int) (map[int]int, error)
+}
+
+type RandomGameGenerator interface {
+	GenerateCombination() []int
+	GenerateValidGame() []int
+	GenerateLottoCombination() Lotto
 }

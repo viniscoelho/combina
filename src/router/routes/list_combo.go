@@ -9,10 +9,10 @@ import (
 )
 
 type listCombo struct {
-	cb types.Combination
+	cb types.LottoCombinator
 }
 
-func NewListComboHandler(cb types.Combination) *listCombo {
+func NewListComboHandler(cb types.LottoCombinator) *listCombo {
 	return &listCombo{cb}
 }
 
