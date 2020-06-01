@@ -43,7 +43,7 @@ func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
 	fy.maxValue = Games[*dto.GameType]
 
 	// calculates how many times each number is allowed to be used
-	fy.maxAllowed = ((fy.numEachGame-numFixed)*fy.numGames)/(fy.maxValue-numFixed) + 1
+	fy.maxAllowed = ((fy.numEachGame - numFixed) * fy.numGames) / (fy.maxValue - numFixed)
 	if ((fy.numEachGame-numFixed)*fy.numGames)%(fy.maxValue-numFixed) != 0 {
 		fy.maxAllowed++
 	}
@@ -75,7 +75,7 @@ func (fy *fisherYatesModified) initialize() {
 		_, isMostSorted := mostSorted[num]
 
 		if isMostSorted {
-			fy.repeated[num] = int(float64(fy.maxAllowed) * 1.25)
+			fy.repeated[num] = int(float64(fy.maxAllowed) * 1.5)
 		} else if !isFixed && !isMostSorted {
 			fy.repeated[num] = fy.maxAllowed
 			fy.remainingNumbers = append(fy.remainingNumbers, num)
@@ -88,8 +88,6 @@ func (fy *fisherYatesModified) initialize() {
 // The numbers from the most sorted slice have a higher probability
 // to be included on each combination.
 func (fy *fisherYatesModified) GenerateCombination() []int {
-	rand.Seed(time.Now().UnixNano())
-
 	numbers_k, numbers_nk := make([]int, len(fy.mostSortedNumbers)), make([]int, len(fy.remainingNumbers))
 	copy(numbers_k, fy.mostSortedNumbers)
 	copy(numbers_nk, fy.remainingNumbers)
@@ -99,6 +97,7 @@ func (fy *fisherYatesModified) GenerateCombination() []int {
 	k := len(fy.mostSortedNumbers)
 	p, q := 5, 3
 
+	rand.Seed(time.Now().UnixNano())
 	result := make([]int, m)
 	for i := 0; i < m; i++ {
 		if rand.Intn(k*p+(n-k)*q) < k*p {

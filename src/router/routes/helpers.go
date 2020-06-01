@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"log"
-
 	"github.com/combina/src/storage/types"
 )
 
@@ -85,7 +83,7 @@ func isValidNumGames(numGames int64, maxValue, numPicked, numFixed int) bool {
 		rem *= int64(i)
 	}
 
-	log.Printf("Number of possible combinations: %v", rem/fact[r])
+	// log.Printf("Number of possible combinations: %v", rem/fact[r])
 	if numGames > rem/fact[r] {
 		return false
 	}
