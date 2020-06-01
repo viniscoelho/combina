@@ -17,7 +17,7 @@ type randomGameGenerator struct {
 	numGames    int
 	numEachGame int
 	maxValue    int
-	maxRepeated int
+	maxAllowed  int
 
 	gameType string
 	alias    string
@@ -37,9 +37,9 @@ func NewRandomGameGenerator(dto LottoInputDTO) *randomGameGenerator {
 	rgg.numEachGame = *dto.NumEachGame
 	rgg.maxValue = Games[*dto.GameType]
 
-	rgg.maxRepeated = ((rgg.numEachGame-numFixed)*rgg.numGames)/(rgg.maxValue-numFixed) + 1
+	rgg.maxAllowed = ((rgg.numEachGame-numFixed)*rgg.numGames)/(rgg.maxValue-numFixed) + 1
 	if ((rgg.numEachGame-numFixed)*rgg.numGames)%(rgg.maxValue-numFixed) != 0 {
-		rgg.maxRepeated++
+		rgg.maxAllowed++
 	}
 
 	rgg.gameType = *dto.GameType
@@ -63,7 +63,7 @@ func (rgg *randomGameGenerator) initialize() {
 	}
 	for num := lo; num <= hi; num++ {
 		if _, ok := fixed[num]; !ok {
-			rgg.repeated[num] = rgg.maxRepeated
+			rgg.repeated[num] = rgg.maxAllowed
 		}
 	}
 }

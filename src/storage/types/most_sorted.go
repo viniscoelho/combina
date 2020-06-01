@@ -19,7 +19,7 @@ type fisherYatesModified struct {
 	numGames    int
 	numEachGame int
 	maxValue    int
-	maxRepeated int
+	maxAllowed  int
 
 	gameType string
 	alias    string
@@ -42,9 +42,10 @@ func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
 	fy.numEachGame = *dto.NumEachGame
 	fy.maxValue = Games[*dto.GameType]
 
-	fy.maxRepeated = ((fy.numEachGame-numFixed)*fy.numGames)/(fy.maxValue-numFixed) + 1
+	// calculates how many times each number is allowed to be used
+	fy.maxAllowed = ((fy.numEachGame-numFixed)*fy.numGames)/(fy.maxValue-numFixed) + 1
 	if ((fy.numEachGame-numFixed)*fy.numGames)%(fy.maxValue-numFixed) != 0 {
-		fy.maxRepeated++
+		fy.maxAllowed++
 	}
 
 	fy.gameType = *dto.GameType
@@ -72,12 +73,12 @@ func (fy *fisherYatesModified) initialize() {
 	for num := lo; num <= hi; num++ {
 		_, isFixed := fixed[num]
 		_, isMostSorted := mostSorted[num]
-		if !isFixed && !isMostSorted {
-			fy.remainingNumbers = append(fy.remainingNumbers, num)
-		}
 
-		if !isFixed {
-			fy.repeated[num] = fy.maxRepeated
+		if isMostSorted {
+			fy.repeated[num] = int(float64(fy.maxAllowed) * 1.25)
+		} else if !isFixed && !isMostSorted {
+			fy.repeated[num] = fy.maxAllowed
+			fy.remainingNumbers = append(fy.remainingNumbers, num)
 		}
 	}
 }
