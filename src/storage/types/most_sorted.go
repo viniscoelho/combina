@@ -95,7 +95,7 @@ func (fy *fisherYatesModified) GenerateCombination() []int {
 	m := fy.numEachGame - len(fy.fixedNumbers)
 	n := fy.maxValue - len(fy.fixedNumbers)
 	k := len(fy.mostSortedNumbers)
-	p, q := 5, 3
+	p, q := 7, 3
 
 	rand.Seed(time.Now().UnixNano())
 	result := make([]int, m)
