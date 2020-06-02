@@ -102,12 +102,6 @@ div#subMenu {
   width: 170px;
 }
 
-/*ul{
-  -moz-column-count: 4;
-  -webkit-column-count: 4;
-  column-count: 4;
-}*/
-
 ul{
   width: 700px;
   margin-bottom: 20px;
@@ -116,7 +110,6 @@ ul{
 li{
   line-height: 1.5em;
   padding-left: 15px;
-  float: left;
   display: inline;
 }
 #double li  { width: 50%;}
@@ -240,14 +233,14 @@ div#textLeft h3, div#textRight h3 {
   width: 90px;
 }
 
-#combinaOpt {
+#comboForm {
     position: fixed;
     top: 40%;
     left: 40%;
-    width: 30em;
-    height: 18em;
-    margin-top: -9em; /*set to a negative number 1/2 of your height*/
-    margin-left: -15em; /*set to a negative number 1/2 of your width*/
+    width: 50%;
+    height: 100%;;
+    margin-top: -9px; /*set to a negative number 1/2 of your height*/
+    margin-left: -15px; /*set to a negative number 1/2 of your width*/
 }
 
 .div-table {

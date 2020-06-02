@@ -1,3 +1,49 @@
+$(document).ready(function(){
+  function getFormData($form){
+    var rawForm = $form.serializeArray();
+    var formAsJson = {};
+
+    $.map(rawForm, function(f, i){
+      if (f['name'] == "fixed_numbers" || f['name'] == "most_sorted") {
+        tmp = f['value'].split(",");
+        numbers = []
+        $.each(tmp, function(index, value){
+          numbers.push(Number(value));
+        });
+        formAsJson[f['name']] = numbers
+      } else if (f['name'] == "num_games" || f['name'] == "num_each") {
+        formAsJson[f['name']] = Number(f['value']);
+      } else {
+        formAsJson[f['name']] = f['value'];
+      }
+    });
+
+    return JSON.stringify(formAsJson);
+  }
+
+  $("#submitCombo").click(function(){
+    var $form = $("#comboForm");
+    var formData = getFormData($form);
+
+    $.ajax({
+      beforeSend: function(request) {
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.setRequestHeader('Accept', 'application/json');
+      },
+      url: 'http://localhost:3000/combinations',
+      type: 'post',
+      data: formData,
+      dataType: 'json',
+      success: function(data) {
+        console.log(data);
+      },
+      error: function(data) {
+        console.log(data);
+      }
+    });
+  });
+});
+
 //quantities
 var qtdFixos = 0;
 var qtdJogos = 0;
@@ -19,51 +65,76 @@ var numbersFixed = [];
 var numComp = [];
 
 function Initialize() {
-    var idJogos = document.getElementById('jogos');
-    var idFixos = document.getElementById('fixos');
-    var idSorteados = document.getElementById('sorteados');
-    var idOutros = document.getElementById('outros');
+    // var idJogos = document.getElementById('jogos');
+    // var idFixos = document.getElementById('fixos');
+    // var idSorteados = document.getElementById('sorteados');
+    // var idOutros = document.getElementById('outros');
+    var idGameType = document.getElementById('gameType');
 
-    opt = document.createElement('option');
-    opt.value = 30;
-    opt.innerHTML = 30;
-    idJogos.options.add(opt);
+    // opt = document.createElement('option');
+    // opt.value = 30;
+    // opt.innerHTML = 30;
+    // idJogos.options.add(opt);
     
-    //fill a selection with the number of games
-    for (var i = 50; i <= 300; i += 25)
-    {
-        opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i;
-        idJogos.options.add(opt);
-    }
+    // //fill a selection with the number of games
+    // for (var i = 50; i <= 300; i += 25)
+    // {
+    //     opt = document.createElement('option');
+    //     opt.value = i;
+    //     opt.innerHTML = i;
+    //     idJogos.options.add(opt);
+    // }
 
-    //fill a selection with the number of fixed numbers
-    for (var i = 0; i <= 10; i++)
-    {
-        opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i;
-        idFixos.options.add(opt);
-    }
+    // //fill a selection with the number of fixed numbers
+    // for (var i = 0; i <= 10; i++)
+    // {
+    //     opt = document.createElement('option');
+    //     opt.value = i;
+    //     opt.innerHTML = i;
+    //     idFixos.options.add(opt);
+    // }
 
-    //fill a selection with the number of chosen numbers
-    for (var i = 15; i <= 40; i += 5)
-    {
-        opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i;
-        idSorteados.options.add(opt);
-    }
+    // //fill a selection with the number of chosen numbers
+    // for (var i = 15; i <= 40; i += 5)
+    // {
+    //     opt = document.createElement('option');
+    //     opt.value = i;
+    //     opt.innerHTML = i;
+    //     idSorteados.options.add(opt);
+    // }
+
+    // //fill a selection with the other numbers
+    // for (var i = 1; i <= 10; i++)
+    // {
+    //     opt = document.createElement('option');
+    //     opt.value = i;
+    //     opt.innerHTML = i;
+    //     idOutros.options.add(opt);
+    // }
 
     //fill a selection with the other numbers
-    for (var i = 1; i <= 10; i++)
-    {
+    //for (var i = 1; i <= 10; i++)
+    //{
         opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i;
-        idOutros.options.add(opt);
-    }
+        opt.value = "Quina-Brasil";
+        opt.innerHTML = "Quina Brasil";
+        idGameType.options.add(opt);
+    //}
+}
+
+function postCombinations() {
+    var formData = JSON.stringify($("#combinaForm").serializeArray());
+    console.log(formData);
+    alert(formData);
+
+    $.ajax({
+        type: "POST",
+        url: "http://localhost:3000/combinations",
+        data: formData,
+        success: function(){},
+        dataType: "json",
+        contentType : "application/json"
+      });
 }
 
 //validate the options on the form
