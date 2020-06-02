@@ -146,7 +146,7 @@ function GenerateFixTable() {
             var td = document.createElement('td');
             var tg = i*10 + j;
             if (tg < 10) tg = '0' + tg;
-            td.innerHTML = "<button type='button' class='btn btn-danger' value='" + (i*10 + j) +
+            td.innerHTML = "<button type='button' class='btn btn-dark' value='" + (i*10 + j) +
                 "' onclick='javascript:GetFixedNumber(this)'>" + tg + "</button>";
             tr.appendChild(td);
         }
