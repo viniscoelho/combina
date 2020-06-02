@@ -31,6 +31,9 @@ github.com/jackc/pgx/v4/pgxpool
 github.com/jackc/puddle
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/rs/cors v1.7.0
+## explicit
+github.com/rs/cors
 # github.com/stretchr/testify v1.5.1
 ## explicit
 github.com/stretchr/testify/assert

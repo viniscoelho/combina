@@ -9,6 +9,7 @@ import (
 	"github.com/combina/src/db"
 	"github.com/combina/src/router"
 	"github.com/combina/src/storage/lottostore"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -23,8 +24,21 @@ func main() {
 		log.Fatalf("could not initialize storage: %s", err)
 	}
 
+	r := router.CreateRoutes(ls)
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodDelete,
+		},
+		AllowedHeaders:   []string{"Accept", "Content-Type"},
+		AllowCredentials: false,
+	})
+	handler := c.Handler(r)
+
 	s := &http.Server{
-		Handler:      router.CreateRoutes(ls),
+		Handler:      handler,
 		ReadTimeout:  0,
 		WriteTimeout: 0,
 		Addr:         ":3000",

@@ -18,13 +18,7 @@ func NewCreateComboHandler(cb types.LottoCombinator) *createCombo {
 }
 
 func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	// tkn := r.Header.Get("Authorization")
-	// if len(tkn) == 0 {
-	// 	log.Printf("Unauthorized request to resource: missing authorization header")
-	// 	rw.WriteHeader(http.StatusUnauthorized)
-	// 	rw.Write([]byte("unauthorized"))
-	// 	return
-	// }
+	log.Printf("%s request received at %s", http.MethodPost, r.URL.RequestURI())
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -37,7 +31,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	newInputDTO := types.LottoInputDTO{}
 	err = json.Unmarshal(body, &newInputDTO)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occured during unmarshal: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("internal server error"))
 		return
@@ -83,6 +77,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Combination %s successfully created", lotto.ID)
 	rw.Header().Add("Location", lotto.ID)
 	rw.WriteHeader(http.StatusCreated)
 }
