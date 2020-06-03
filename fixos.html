@@ -1,61 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <script type="text/javascript" src="combina.js"></script>
+<script type="text/javascript" src="common/header.js"></script>
 
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <script src="js/bootstrap.min.js"></script>
+<body onload="GenerateFixTable();">
+  <script type="text/javascript" src="common/menu.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="css/default.css">
-    <title>CombinaJogos v3.0</title>
-  </head>
-
-  <body onload="GenerateFixTable();">
-    <form id="combinaSel" action="">
-      <div class="div-table">
-        <div class="div-table-row">
-          <div class="inner-text-wide div-table-col-c">
-            <strong>Selecione os números fixos:</strong>
-            <table data-toggle="table" class="table" id="tabelaNumeros">
-            </table>
-          </div>
-          <div id="six" class="div-table-col-d">
-            <ul id="numFixosSelecionados" class="styled-ul">
-              <li></li>
-            </ul>
-          </div>
+  <form id="combinaSel" action="">
+    <div class="div-table">
+      <div class="div-table-row">
+        <div class="inner-text-wide div-table-col-c">
+          <strong>Selecione os números fixos:</strong>
+          <table data-toggle="table" class="table" id="tabelaNumeros">
+          </table>
+        </div>
+        <div id="six" class="div-table-col-d">
+          <ul id="numFixosSelecionados" class="styled-ul">
+            <li></li>
+          </ul>
         </div>
       </div>
-
-      <div class="div-table">
-        <div class="div-table-row">
-          <div class="inner-text-wide div-table-col-c">
-            <strong>Selecione os números mais sorteados:</strong>
-            <table data-toggle="table" class="table" id="tabelaNumerosMais">
-            </table>
-          </div>
-          <div id="quad" class="div-table-col-d">
-            <ul id="numSorteadosSelecionados" class="styled-ul">
-              <li></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div class="buttons">
-          <button type="button" class="btn btn-default" onclick="clearBox('tabelaJogos'); GenerateJogos();">Ok</button>
-          <button type="reset" class="btn btn-default" onclick="clearBox('numFixosSelecionados'); clearBox('numSorteadosSelecionados'); clearBox('tabelaJogos');">Reset</button>
-        </div>
-      </div>
-    </form>
-
-    <div class="inner-text-wide">
-      <strong>Jogos gerados</strong>
-      <table data-toggle="table" class="table" id="tabelaJogos">
-      </table>
     </div>
-  </body>
+
+    <div class="buttons">
+      <button type="button" class="btn btn-primary" onclick="clearBox('tabelaJogos'); GenerateJogos();">Ok</button>
+      <button type="reset" class="btn btn-default"
+        onclick="clearBox('numFixosSelecionados'); clearBox('numSorteadosSelecionados'); clearBox('tabelaJogos');">Reset</button>
+    </div>
+  </form>
+
+  <script type="text/javascript" src="common/footer.js"></script>
+</body>
+
 </html>

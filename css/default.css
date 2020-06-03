@@ -15,7 +15,6 @@ html, body {
 }
 
 table, th, td {
-  border: 1px solid black;
   border-collapse: collapse;
 }
 
@@ -86,13 +85,6 @@ div#textWide {
   width: 760px;
 }
 
-div#image {
-  float: left;
-  width: 250px;
-  text-align: center;
-  padding: 55px 0 0 0;
-}
-
 div#image img {
   margin-top: 40px;
 }
@@ -144,7 +136,6 @@ div.inner-text ol {
 }
 
 div.inner-text-wide {
-  padding: 10px 0px 10px 10px;
   float: left;
   width: 650px;
 }
@@ -235,7 +226,6 @@ div#textLeft h3, div#textRight h3 {
 .centered {
   display: table;
   margin: 0 auto;
-  /* border: 1px solid black; */
   padding: 10px;
 }
 
