@@ -45,6 +45,7 @@ func NewRandomGameGenerator(dto LottoInputDTO) *randomGameGenerator {
 	numFixed := len(rgg.fixedNumbers)
 	maxRange := rgg.gameRange.Max
 
+	// calculates how many times each number is allowed to be used
 	rgg.maxUsage = ((rgg.numEachGame-numFixed)*rgg.numGames)/(maxRange-numFixed) + 1
 	if ((rgg.numEachGame-numFixed)*rgg.numGames)%(maxRange-numFixed) != 0 {
 		rgg.maxUsage++

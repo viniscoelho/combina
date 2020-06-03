@@ -77,7 +77,6 @@ func isValidNumGames(numGames int64, maxRange, numPicked, numFixed int) bool {
 		rem *= int64(i)
 	}
 
-	// log.Printf("Number of possible combinations: %v", rem/fact[r])
 	if numGames > rem/fact[r] {
 		return false
 	}
