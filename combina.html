@@ -1,42 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="common/header.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
-
-  <!-- Bootstrap -->
-  <script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
-  <script type="text/javascript" src="js/bootstrap.min.js"></script>
-  <link href="css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Custom scripts and styles -->
-  <script type="text/javascript" src="combina.js"></script>
-  <link rel="stylesheet" type="text/css" href="css/default.css">
-
-  <title>Combina Jogos v3.0</title>
-</head>
-
-<body onload="Initialize();">
-  <div class="header">
-    <div class="centered">
-          <img src="images/combina-jogos.jpg" alt="Combina Jogos" width="300" height="175" />
-        </div>
-    <table class="menu centered">
-      <tr>
-        <td><a href="combina.html">Apresentação</a></td>
-        <td><a href="combina.html">Sobre</a></td>
-        <td><a href="combina.html">Como usar?</a></td>
-        <td><a href="combina.html">Parâmetros</a></td>
-        <td><a href="combina.html">Gerar entrada</a></td>
-        <td><a href="combina.html">Cálculos</a></td>
-        <td><a href="combina.html">Créditos</a></td>
-        <td><a href="combina.html">Contato</a></td>
-      </tr>
-    </table>
-  </div>
+<body onload='Initialize();'>
+  <script type="text/javascript" src="common/menu.js"></script>
 
   <form id="comboForm" method="POST" onsubmit="">
     <div class="centered">
@@ -100,11 +68,12 @@
       </div>
 
       <div class="buttons">
-        <button id="submitCombo" type="submit" class="btn btn-danger">Ok</button>
+        <button id="submitCombo" type="submit" class="btn btn-primary">Ok</button>
         <button type="reset" class="btn btn-default">Reset</button>
       </div>
     </div>
   </form>
+  <script type="text/javascript" src="common/footer.js"></script>
 </body>
 
 </html>
