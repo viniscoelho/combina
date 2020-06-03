@@ -43,7 +43,7 @@ func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
 	fy.maxValue = Games[*dto.GameType]
 
 	// calculates how many times each number is allowed to be used
-	fy.maxAllowed = ((fy.numEachGame - numFixed) * fy.numGames) / (fy.maxValue - numFixed)
+	fy.maxAllowed = ((fy.numEachGame-numFixed)*fy.numGames)/(fy.maxValue-numFixed) + 1
 	if ((fy.numEachGame-numFixed)*fy.numGames)%(fy.maxValue-numFixed) != 0 {
 		fy.maxAllowed++
 	}
