@@ -1,85 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <!-- Bootstrap -->
-    <script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Custom scripts and styles -->
-    <script type="text/javascript" src="combina.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/default.css">
-    <title>CombinaJogos v3.0</title>
-  </head>
+  <!-- Bootstrap -->
+  <script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
 
-  <body onload="Initialize();">
-    <form id="comboForm" method="POST" onsubmit="">
-      <div class="div-table">
-        <div id="gameTypeRow" class="div-table-row">
-          <div class="div-table-col-a">
-            <strong>Qual jogo deseja fazer?</strong>
-          </div>
-          <div class="div-table-col-b">
-            <select id="gameType" name="game_type" style="width:150px;" class="form-control RightOriented" required>
-              <option></option>
-            </select>
-          </div>
+  <!-- Custom scripts and styles -->
+  <script type="text/javascript" src="combina.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/default.css">
+
+  <title>Combina Jogos v3.0</title>
+</head>
+
+<body onload="Initialize();">
+  <div class="header">
+    <div class="centered">
+          <img src="images/combina-jogos.jpg" alt="Combina Jogos" width="300" height="175" />
         </div>
+    <table class="menu centered">
+      <tr>
+        <td><a href="combina.html">Apresentação</a></td>
+        <td><a href="combina.html">Sobre</a></td>
+        <td><a href="combina.html">Como usar?</a></td>
+        <td><a href="combina.html">Parâmetros</a></td>
+        <td><a href="combina.html">Gerar entrada</a></td>
+        <td><a href="combina.html">Cálculos</a></td>
+        <td><a href="combina.html">Créditos</a></td>
+        <td><a href="combina.html">Contato</a></td>
+      </tr>
+    </table>
+  </div>
 
-        <div id="numGamesRow" class="div-table-row">
-          <div class="div-table-col-a">
-            <strong>Digite a quantidade de jogos:</strong>
-          </div>
-          <div class="div-table-col-b">
-            <input name="num_games" style="width:150px;" type="number" class="form-control RightOriented" maxlength="7" size="7" required />
-          </div>
+  <form id="comboForm" method="POST" onsubmit="">
+    <div class="centered">
+      <div id="gameTypeRow" class="div-table-row">
+        <div class="div-table-col-a">
+          <strong>Qual jogo deseja fazer?</strong>
         </div>
-
-        <div id="numEachRow" class="div-table-row">
-          <div class="div-table-col-a">
-            <strong>Quantos números cada jogo terá?:</strong>
-          </div>
-          <div class="div-table-col-b">
-            <input name="num_each" style="width:150px;" type="number" class="form-control RightOriented" maxlength="3" size="3" required />
-          </div>
-        </div>
-
-        <div id="fixedNumbersRow" class="div-table-row">
-          <div class="div-table-col-a">
-            <strong>Digite os números fixos (separados por vírgula):</strong>
-          </div>
-          <div class="div-table-col-b">
-            <input name="fixed_numbers" style="width:150px;" class="form-control RightOriented" maxlength="30" size="30" required />
-          </div>
-        </div>
-
-        <div id="mostSortedRow" class="div-table-row">
-          <div class="div-table-col-a">
-            <strong>Digite os números mais sorteados (separados por vírgula):</strong>
-          </div>
-          <div class="div-table-col-b">
-            <input name="most_sorted" style="width:150px;" class="form-control RightOriented" maxlength="50" size="50" required />
-          </div>
-        </div>
-
-        <div id="aliasRow" class="div-table-row">
-          <div class="div-table-col-a">
-            <strong>Dê um nome a este jogo (opcional)*:</strong>
-          </div>
-          <div class="div-table-col-b">
-            <input name="alias" style="width:150px;" class="form-control RightOriented" maxlength="50" size="50" />
-          </div>
-        </div>
-
-        <div class="buttons">
-          <button id="submitCombo" type="submit" class="btn btn-danger">Ok</button>
-          <button type="reset" class="btn btn-default">Reset</button>
+        <div class="div-table-col-b">
+          <select id="gameType" name="game_type" class="form-control input-width at-right" required>
+            <option></option>
+          </select>
         </div>
       </div>
-    </form>
-  </body>
+
+      <div id="numGamesRow" class="div-table-row">
+        <div class="div-table-col-a">
+          <strong>Digite a quantidade de jogos:</strong>
+        </div>
+        <div class="div-table-col-b">
+          <input name="num_games" type="number" class="form-control input-width at-right" maxlength="7" size="7"
+            required />
+        </div>
+      </div>
+
+      <div id="numEachRow" class="div-table-row">
+        <div class="div-table-col-a">
+          <strong>Quantos números cada jogo terá?:</strong>
+        </div>
+        <div class="div-table-col-b">
+          <input name="num_each" type="number" class="form-control input-width at-right" maxlength="3" size="3"
+            required />
+        </div>
+      </div>
+
+      <div id="fixedNumbersRow" class="div-table-row">
+        <div class="div-table-col-a">
+          <strong>Digite os números fixos (separados por vírgula):</strong>
+        </div>
+        <div class="div-table-col-b">
+          <input name="fixed_numbers" class="form-control input-width at-right" maxlength="30" size="30"
+            required />
+        </div>
+      </div>
+
+      <div id="mostSortedRow" class="div-table-row">
+        <div class="div-table-col-a">
+          <strong>Digite os números mais sorteados (separados por vírgula):</strong>
+        </div>
+        <div class="div-table-col-b">
+          <input name="most_sorted" class="form-control input-width at-right" maxlength="50" size="50" required />
+        </div>
+      </div>
+
+      <div id="aliasRow" class="div-table-row">
+        <div class="div-table-col-a">
+          <strong>Dê um nome a este jogo (opcional)*:</strong>
+        </div>
+        <div class="div-table-col-b">
+          <input name="alias" class="form-control input-width at-right" maxlength="50" size="50" />
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="submitCombo" type="submit" class="btn btn-danger">Ok</button>
+        <button type="reset" class="btn btn-default">Reset</button>
+      </div>
+    </div>
+  </form>
+</body>
+
 </html>

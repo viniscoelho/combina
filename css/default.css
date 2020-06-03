@@ -1,13 +1,13 @@
 /* default.css */
 
 * {
+  font-family: 'Open Sans', sans-serif;
   padding: 0;
   margin: 0;
 }
 
-body {
-  width: 950px;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+html, body {
+  width: 100%;
   padding-left: 10px;
   font-size: 16px;
   margin-top: 10px;
@@ -133,51 +133,51 @@ ul#subLinks li a {
   text-decoration: none;
 }
 
-div.InnerText {
+div.inner-text {
   padding: 10px 0px 10px 10px;
   float: left;
   width: 275px;
 }
 
-div.InnerText ol {
+div.inner-text ol {
   padding: 0 0 0 30px;
 }
 
-div.InnerTextWide {
+div.inner-text-wide {
   padding: 10px 0px 10px 10px;
   float: left;
   width: 650px;
 }
 
-div.InnerTextWide ol {
+div.inner-text-wide ol {
   padding: 0 0 0 30px;
 }
 
-.TopPadded {
+.top-padded {
   padding-top: 10px;
 }
 
-.BottomPadded {
+.bottom-padded {
   padding-bottom: 10px;
 }
 
-ul.LeftPadded {
+ul.left-padded {
   padding-left: 30px;
 }
 
-.LeftOriented {
+.at-left{
   float: left;
 }
 
-.RightOriented {
+.at-right{
   float: right;
 }
 
-ul.Styled {
+ul.styled-ul {
   list-style-type: none;
 }
 
-ul.Styled li {
+ul.styled-ul li {
   padding-bottom: 3px;
 }
 
@@ -233,14 +233,15 @@ div#textLeft h3, div#textRight h3 {
   width: 90px;
 }
 
-#comboForm {
-    position: fixed;
-    top: 40%;
-    left: 40%;
-    width: 50%;
-    height: 100%;;
-    margin-top: -9px; /*set to a negative number 1/2 of your height*/
-    margin-left: -15px; /*set to a negative number 1/2 of your width*/
+.centered {
+  display: table;
+  margin: 0 auto;
+  /* border: 1px solid black; */
+  padding: 10px;
+}
+
+.input-width {
+  width: 150px;
 }
 
 .div-table {
@@ -280,3 +281,67 @@ div#textLeft h3, div#textRight h3 {
   width: 700px;
 }
 
+.div-table-row {
+  display: table-row;
+  width: auto;
+  clear: both;
+}
+
+.div-table-col-b {
+  float: left;
+  display: table-column;
+  width: 150px;
+}
+
+.div-table-col-c {
+  float: left;
+  width: 600px;
+}
+
+.div-table-col-footer {
+  float: left;
+  display: table-cell;
+  width: 220px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.div-table-col-header {
+  display: table-cell;
+  width: 150px;
+}
+
+.padded {
+  padding: 10px 5px 20px 5px; 
+}
+
+.menu {
+  font-size: 15px;
+}
+
+.menu tr td {
+  background: #FFF;
+  border: 1px solid #FFF;
+}
+
+.menu tr td a {
+  font-size: 16px;
+  color: #000;
+  text-decoration: none;
+  display: block;
+  height:100%;
+  width:100%;
+  padding: 10px;
+}
+
+.menu tr td a:hover {
+  background: #227;
+  color: #FFF;
+}
+
+.header {
+  text-align: center;
+  margin: 0 auto;
+  padding-top: 30px;
+  padding-bottom: 40px;
+}
