@@ -9,20 +9,40 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	Games = map[string]MinMaxRange{
+		"Lotofacil":    {1, 25},
+		"Lotomania":    {0, 99},
+		"Quina":        {1, 80},
+		"Mega-Sena":    {1, 60},
+		"Quina-Brasil": {1, 80},
+		"Seninha":      {1, 60},
+	}
+)
+
 type fisherYatesModified struct {
-	generated         map[string]bool
-	repeated          map[int]int
-	fixedNumbers      []int
+	// A map to store each combination that has been generated
+	generated map[string]bool
+	// A map to count how many times a number has been used
+	repeated map[int]int
+	// A slice having the fixed numbers
+	fixedNumbers []int
+	// A slice having the most probably sorted numbers
 	mostSortedNumbers []int
-	remainingNumbers  []int
-
-	numGames    int
+	// A slice having all the remaining numbers
+	remainingNumbers []int
+	// Number of games (a.k.a. combinations) to be generated
+	numGames int
+	// Amount of numbers for each game
 	numEachGame int
-	maxValue    int
-	maxAllowed  int
-
+	// Maximum value allowed for each non-fixed number to be used
+	maxUsage int
+	// Game set kind, e.g., Quina, Lotofacil, ...
 	gameType string
-	alias    string
+	// Minimum and maximum allowed values for a game, e.g, [1, 80]
+	gameRange MinMaxRange
+	// An alias for the game set
+	alias string
 }
 
 func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
@@ -32,20 +52,20 @@ func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
 	fy.repeated = make(map[int]int)
 	fy.fixedNumbers = make([]int, len(dto.FixedNumbers))
 	fy.mostSortedNumbers = make([]int, len(dto.MostSortedNumbers))
-	fy.remainingNumbers = make([]int, 0)
 
 	copy(fy.fixedNumbers, dto.FixedNumbers)
 	copy(fy.mostSortedNumbers, dto.MostSortedNumbers)
 
-	numFixed := len(fy.fixedNumbers)
 	fy.numGames = *dto.NumGames
 	fy.numEachGame = *dto.NumEachGame
-	fy.maxValue = Games[*dto.GameType]
+	fy.gameRange = Games[*dto.GameType]
+	numFixed := len(fy.fixedNumbers)
+	maxRange := fy.gameRange.Max
 
 	// calculates how many times each number is allowed to be used
-	fy.maxAllowed = ((fy.numEachGame-numFixed)*fy.numGames)/(fy.maxValue-numFixed) + 1
-	if ((fy.numEachGame-numFixed)*fy.numGames)%(fy.maxValue-numFixed) != 0 {
-		fy.maxAllowed++
+	fy.maxUsage = ((fy.numEachGame-numFixed)*fy.numGames)/(maxRange-numFixed) + 1
+	if ((fy.numEachGame-numFixed)*fy.numGames)%(maxRange-numFixed) != 0 {
+		fy.maxUsage++
 	}
 
 	fy.gameType = *dto.GameType
@@ -64,21 +84,20 @@ func (fy *fisherYatesModified) initialize() {
 		mostSorted[num] = true
 	}
 
-	lo, hi := 1, fy.maxValue
-	// workaround for Lotomania
-	if fy.maxValue == 100 {
-		lo--
-		hi--
-	}
-	for num := lo; num <= hi; num++ {
+	minRange, maxRange := fy.gameRange.Min, fy.gameRange.Max
+	numRemaining := maxRange - len(fy.fixedNumbers) - len(fy.mostSortedNumbers)
+	fy.remainingNumbers = make([]int, numRemaining)
+
+	for num, cur := minRange, 0; num <= maxRange; num++ {
 		_, isFixed := fixed[num]
 		_, isMostSorted := mostSorted[num]
 
 		if isMostSorted {
-			fy.repeated[num] = int(float64(fy.maxAllowed) * 1.5)
+			fy.repeated[num] = int(float64(fy.maxUsage) * 1.5)
 		} else if !isFixed && !isMostSorted {
-			fy.repeated[num] = fy.maxAllowed
-			fy.remainingNumbers = append(fy.remainingNumbers, num)
+			fy.repeated[num] = fy.maxUsage
+			fy.remainingNumbers[cur] = num
+			cur++
 		}
 	}
 }
@@ -92,9 +111,14 @@ func (fy *fisherYatesModified) GenerateCombination() []int {
 	copy(numbers_k, fy.mostSortedNumbers)
 	copy(numbers_nk, fy.remainingNumbers)
 
+	// numbers within a combination
 	m := fy.numEachGame - len(fy.fixedNumbers)
-	n := fy.maxValue - len(fy.fixedNumbers)
+	// numbers allowed to be chosen
+	n := fy.gameRange.Max - len(fy.fixedNumbers)
+	// numbers that have higher probability to be chosen
 	k := len(fy.mostSortedNumbers)
+	// probability of a number to be chosen from sets k and nk, respectively
+	// the higher the value, the higher the probability
 	p, q := 7, 3
 
 	rand.Seed(time.Now().UnixNano())

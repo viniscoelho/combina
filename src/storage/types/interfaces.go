@@ -3,6 +3,11 @@ package types
 
 import "time"
 
+type MinMaxRange struct {
+	Min int
+	Max int
+}
+
 type LottoInputDTO struct {
 	NumGames          *int    `json:"num_games"`
 	NumEachGame       *int    `json:"num_each"`

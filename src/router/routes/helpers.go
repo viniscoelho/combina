@@ -42,16 +42,10 @@ func isNumEachWithinRange(numEachGame int, gameType string) bool {
 	return false
 }
 
-func isValidNumbers(maxValue int, numbers []int) bool {
-	lo, hi := 1, maxValue
-	// workaround for Lotomania
-	if maxValue == 100 {
-		lo--
-		hi--
-	}
-
+func isValidNumbers(r types.MinMaxRange, numbers []int) bool {
+	minRange, maxRange := r.Min, r.Max
 	for _, num := range numbers {
-		if num < lo || num > hi {
+		if num < minRange || num > maxRange {
 			return false
 		}
 	}
@@ -62,8 +56,8 @@ func isValidNumbers(maxValue int, numbers []int) bool {
 // possible to be generated. It follows the combination formula:
 // nCr = n!/r!(n-r)!
 // n = maxValue-numFixed, r = numPicked-numFixed, c = n-r
-func isValidNumGames(numGames int64, maxValue, numPicked, numFixed int) bool {
-	n, r := maxValue-numFixed, numPicked-numFixed
+func isValidNumGames(numGames int64, maxRange, numPicked, numFixed int) bool {
+	n, r := maxRange-numFixed, numPicked-numFixed
 	// if it reached this point of validation and r > 20,
 	// this means that it is a Lotomania game. Therefore,
 	// there is no need to do this calculation, because the
@@ -108,7 +102,8 @@ func validateInputDTO(dto types.LottoInputDTO) error {
 		return types.InvalidDTOError{Message: "amount of fixed numbers cannot be greater than picked numbers"}
 	}
 
-	if len(dto.MostSortedNumbers) > types.Games[*dto.GameType]-len(dto.FixedNumbers) {
+	r := types.Games[*dto.GameType]
+	if len(dto.MostSortedNumbers) > r.Max-len(dto.FixedNumbers) {
 		return types.InvalidDTOError{Message: "amount of most sorted numbers cannot be greater than remaining numbers"}
 	}
 
@@ -116,15 +111,15 @@ func validateInputDTO(dto types.LottoInputDTO) error {
 		return types.InvalidDTOError{Message: "amount of picked numbers should be within a valid range"}
 	}
 
-	if !isValidNumbers(types.Games[*dto.GameType], dto.FixedNumbers) {
+	if !isValidNumbers(r, dto.FixedNumbers) {
 		return types.InvalidDTOError{Message: "some fixed numbers are invalid -- choose numbers within a valid range"}
 	}
 
-	if !isValidNumbers(types.Games[*dto.GameType], dto.MostSortedNumbers) {
+	if !isValidNumbers(r, dto.MostSortedNumbers) {
 		return types.InvalidDTOError{Message: "some most sorted numbers are invalid -- choose numbers within a valid range"}
 	}
 
-	if !isValidNumGames(int64(*dto.NumGames), types.Games[*dto.GameType], *dto.NumEachGame, len(dto.FixedNumbers)) {
+	if !isValidNumGames(int64(*dto.NumGames), r.Max, *dto.NumEachGame, len(dto.FixedNumbers)) {
 		return types.InvalidDTOError{Message: "number of games is invalid -- use another value or change the amount of fixed numbers"}
 	}
 

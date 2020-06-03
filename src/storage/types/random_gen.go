@@ -10,17 +10,24 @@ import (
 )
 
 type randomGameGenerator struct {
-	generated    map[string]bool
-	repeated     map[int]int
+	// A map to store each combination that has been generated
+	generated map[string]bool
+	// A map to count how many times a number has been used
+	repeated map[int]int
+	// A slice having the fixed numbers
 	fixedNumbers []int
-
-	numGames    int
+	// Number of games (a.k.a. combinations) to be generated
+	numGames int
+	// Amount of numbers for each game
 	numEachGame int
-	maxValue    int
-	maxAllowed  int
-
+	// Maximum value allowed for each non-fixed number to be used
+	maxUsage int
+	// Game set kind, e.g., Quina, Lotofacil, ...
 	gameType string
-	alias    string
+	// Minimum and maximum allowed values for a game, e.g, [1, 80]
+	gameRange MinMaxRange
+	// An alias for the game set
+	alias string
 }
 
 func NewRandomGameGenerator(dto LottoInputDTO) *randomGameGenerator {
@@ -32,14 +39,15 @@ func NewRandomGameGenerator(dto LottoInputDTO) *randomGameGenerator {
 
 	copy(rgg.fixedNumbers, dto.FixedNumbers)
 
-	numFixed := len(rgg.fixedNumbers)
 	rgg.numGames = *dto.NumGames
 	rgg.numEachGame = *dto.NumEachGame
-	rgg.maxValue = Games[*dto.GameType]
+	rgg.gameRange = Games[*dto.GameType]
+	numFixed := len(rgg.fixedNumbers)
+	maxRange := rgg.gameRange.Max
 
-	rgg.maxAllowed = ((rgg.numEachGame-numFixed)*rgg.numGames)/(rgg.maxValue-numFixed) + 1
-	if ((rgg.numEachGame-numFixed)*rgg.numGames)%(rgg.maxValue-numFixed) != 0 {
-		rgg.maxAllowed++
+	rgg.maxUsage = ((rgg.numEachGame-numFixed)*rgg.numGames)/(maxRange-numFixed) + 1
+	if ((rgg.numEachGame-numFixed)*rgg.numGames)%(maxRange-numFixed) != 0 {
+		rgg.maxUsage++
 	}
 
 	rgg.gameType = *dto.GameType
@@ -55,15 +63,10 @@ func (rgg *randomGameGenerator) initialize() {
 		fixed[num] = true
 	}
 
-	lo, hi := 1, rgg.maxValue
-	// workaround for Lotomania
-	if rgg.maxValue == 100 {
-		lo--
-		hi--
-	}
-	for num := lo; num <= hi; num++ {
+	minRange, maxRange := rgg.gameRange.Min, rgg.gameRange.Max
+	for num := minRange; num <= maxRange; num++ {
 		if _, ok := fixed[num]; !ok {
-			rgg.repeated[num] = rgg.maxAllowed
+			rgg.repeated[num] = rgg.maxUsage
 		}
 	}
 }
