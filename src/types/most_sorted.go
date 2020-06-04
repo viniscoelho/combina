@@ -81,7 +81,7 @@ func (fy *fisherYatesModified) initialize() {
 		_, isMostSorted := mostSorted[num]
 
 		if isMostSorted {
-			fy.repeated[num] = int(float64(fy.maxUsage) * 1.5)
+			fy.repeated[num] = int(float64(fy.maxUsage) * 1.75)
 		} else if !isFixed && !isMostSorted {
 			fy.repeated[num] = fy.maxUsage
 			fy.remainingNumbers = append(fy.remainingNumbers, num)
@@ -169,8 +169,6 @@ func (fy *fisherYatesModified) GenerateLottoCombination() Lotto {
 	for i := 0; i < fy.numGames; i++ {
 		numbers := fy.GenerateValidGame()
 		combination = append(combination, numbers)
-		// TODO: remove this comment
-		// fmt.Fprintf(os.Stdout, "Numbers: %v\n", numbers)
 	}
 
 	id := uuid.New()

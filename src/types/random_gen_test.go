@@ -1,8 +1,11 @@
 package types
 
 import (
+	"fmt"
+	"log"
 	"testing"
 
+	"github.com/combina/src/types/ds"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,4 +53,53 @@ func TestGenerateLottoCombination_RG(t *testing.T) {
 	r.Equal(*dto.NumEachGame, lotto.Numbers.Columns)
 	r.Equal(*dto.GameType, lotto.GameType)
 	r.Equal(*dto.Alias, lotto.Alias)
+}
+
+func TestGenerateLottoCombination_RG_PossibleEntries(t *testing.T) {
+	r := require.New(t)
+
+	cases := make([]testCases, 0)
+	for f := 0; f <= 4; f++ {
+		for ng := 1; ng <= 5; ng++ {
+			numGames := 100
+			numEach := 13
+			fixed := []int{13, 41, 62, 78}
+			gameType := "Quina-Brasil"
+			result := []int{12, 25, 51, 60, 74}
+
+			cur := testCases{
+				name:       fmt.Sprintf("%v games -- %v fixed", ng*numGames, f),
+				numGames:   ng * numGames,
+				numEach:    numEach,
+				fixed:      fixed,
+				mostSorted: []int{},
+				gameType:   gameType,
+				result:     result,
+			}
+
+			s := ds.NewIntStackFromSlice(cur.result)
+			i := 0
+			for !s.IsEmpty() && i < f {
+				value, err := s.Pop()
+				r.NoError(err)
+				cur.fixed[i] = value
+				i++
+			}
+			cases = append(cases, cur)
+		}
+	}
+	for _, tc := range cases {
+		r := require.New(t)
+		t.Run(tc.name, func(t *testing.T) {
+			dto := newLottoInputDTO(tc.numGames, tc.numEach, tc.fixed, tc.mostSorted, tc.gameType)
+			input, err := NewLottoInput(dto)
+			r.NoError(err)
+
+			rgg := NewRandomGameGenerator(input)
+			lotto := rgg.GenerateLottoCombination()
+			ans, err := evaluateCombination(lotto, tc.result)
+			r.NoError(err)
+			log.Printf("num_games: %v -- results: %+v", tc.numGames, ans)
+		})
+	}
 }

@@ -81,7 +81,7 @@ func TestGenerateLottoCombination_MS_PossibleEntries(t *testing.T) {
 
 				cur := testCases{
 					name:       fmt.Sprintf("%v games -- %v fixed, %v most sorted", ng*numGames, f, ms),
-					numGames:   numGames,
+					numGames:   ng * numGames,
 					numEach:    numEach,
 					fixed:      fixed,
 					mostSorted: mostSorted,
