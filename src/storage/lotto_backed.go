@@ -1,4 +1,4 @@
-package lottostore
+package storage
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/combina/src/db"
-	"github.com/combina/src/storage/types"
+	"github.com/combina/src/types"
 	"github.com/jackc/pgx/v4"
 )
 

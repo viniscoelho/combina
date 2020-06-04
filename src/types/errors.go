@@ -2,12 +2,6 @@ package types
 
 import "fmt"
 
-type EmptyStorageError struct{}
-
-func (e EmptyStorageError) Error() string {
-	return "storage is empty -- no combination was created yet"
-}
-
 type CombinationAlreadyExistsError struct{}
 
 func (e CombinationAlreadyExistsError) Error() string {

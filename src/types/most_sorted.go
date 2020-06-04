@@ -34,20 +34,20 @@ type fisherYatesModified struct {
 	alias string
 }
 
-func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
+func NewMostSortedShuffle(input LottoInput) *fisherYatesModified {
 	fy := fisherYatesModified{}
 
 	fy.generated = make(map[string]bool)
 	fy.repeated = make(map[int]int)
-	fy.fixedNumbers = make([]int, len(dto.FixedNumbers))
-	fy.mostSortedNumbers = make([]int, len(dto.MostSortedNumbers))
+	fy.fixedNumbers = make([]int, len(input.FixedNumbers))
+	fy.mostSortedNumbers = make([]int, len(input.MostSortedNumbers))
 
-	copy(fy.fixedNumbers, dto.FixedNumbers)
-	copy(fy.mostSortedNumbers, dto.MostSortedNumbers)
+	copy(fy.fixedNumbers, input.FixedNumbers)
+	copy(fy.mostSortedNumbers, input.MostSortedNumbers)
 
-	fy.numGames = *dto.NumGames
-	fy.numEachGame = *dto.NumEachGame
-	fy.gameRange = Games[*dto.GameType]
+	fy.numGames = input.NumGames
+	fy.numEachGame = input.NumEachGame
+	fy.gameRange = Games[input.GameType]
 	numFixed := len(fy.fixedNumbers)
 	maxRange := fy.gameRange.Max
 
@@ -57,8 +57,8 @@ func NewMostSortedShuffle(dto LottoInputDTO) *fisherYatesModified {
 		fy.maxUsage++
 	}
 
-	fy.gameType = *dto.GameType
-	fy.alias = *dto.Alias
+	fy.gameType = input.GameType
+	fy.alias = input.Alias
 
 	fy.initialize()
 	return &fy
@@ -74,10 +74,9 @@ func (fy *fisherYatesModified) initialize() {
 	}
 
 	minRange, maxRange := fy.gameRange.Min, fy.gameRange.Max
-	numRemaining := maxRange - len(fy.fixedNumbers) - len(fy.mostSortedNumbers)
-	fy.remainingNumbers = make([]int, numRemaining)
+	fy.remainingNumbers = make([]int, 0)
 
-	for num, cur := minRange, 0; num <= maxRange; num++ {
+	for num := minRange; num <= maxRange; num++ {
 		_, isFixed := fixed[num]
 		_, isMostSorted := mostSorted[num]
 
@@ -85,8 +84,7 @@ func (fy *fisherYatesModified) initialize() {
 			fy.repeated[num] = int(float64(fy.maxUsage) * 1.5)
 		} else if !isFixed && !isMostSorted {
 			fy.repeated[num] = fy.maxUsage
-			fy.remainingNumbers[cur] = num
-			cur++
+			fy.remainingNumbers = append(fy.remainingNumbers, num)
 		}
 	}
 }
@@ -96,9 +94,9 @@ func (fy *fisherYatesModified) initialize() {
 // The numbers from the most sorted slice have a higher probability
 // to be included on each combination.
 func (fy *fisherYatesModified) GenerateCombination() []int {
-	numbers_k, numbers_nk := make([]int, len(fy.mostSortedNumbers)), make([]int, len(fy.remainingNumbers))
-	copy(numbers_k, fy.mostSortedNumbers)
-	copy(numbers_nk, fy.remainingNumbers)
+	numbersK, numbersNK := make([]int, len(fy.mostSortedNumbers)), make([]int, len(fy.remainingNumbers))
+	copy(numbersK, fy.mostSortedNumbers)
+	copy(numbersNK, fy.remainingNumbers)
 
 	// numbers within a combination
 	m := fy.numEachGame - len(fy.fixedNumbers)
@@ -114,10 +112,10 @@ func (fy *fisherYatesModified) GenerateCombination() []int {
 	result := make([]int, m)
 	for i := 0; i < m; i++ {
 		if rand.Intn(k*p+(n-k)*q) < k*p {
-			numbers_k, result[i] = pickRandomValue(numbers_k)
+			numbersK, result[i] = pickRandomValue(numbersK)
 			k--
 		} else {
-			numbers_nk, result[i] = pickRandomValue(numbers_nk)
+			numbersNK, result[i] = pickRandomValue(numbersNK)
 		}
 		n--
 	}
@@ -189,5 +187,4 @@ func (fy *fisherYatesModified) GenerateLottoCombination() Lotto {
 		CreatedOn: time.Now(),
 		Alias:     fy.alias,
 	}
-
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/combina/src/router/routes"
-	"github.com/combina/src/storage/types"
+	"github.com/combina/src/types"
 	"github.com/gorilla/mux"
 )
 

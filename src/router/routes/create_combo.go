@@ -6,8 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/combina/src/storage/types"
+	"github.com/combina/src/types"
 )
+
+const idRouteVar = "id"
 
 type createCombo struct {
 	cb types.LottoCombinator
@@ -28,8 +30,8 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newInputDTO := types.LottoInputDTO{}
-	err = json.Unmarshal(body, &newInputDTO)
+	dto := types.LottoInputDTO{}
+	err = json.Unmarshal(body, &dto)
 	if err != nil {
 		log.Printf("An error occured during unmarshal: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -37,7 +39,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateInputDTO(newInputDTO)
+	lottoInput, err := types.NewLottoInput(dto)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 
@@ -54,10 +56,10 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var rgg types.RandomGameGenerator
-	if len(newInputDTO.MostSortedNumbers) != 0 {
-		rgg = types.NewMostSortedShuffle(newInputDTO)
+	if len(lottoInput.MostSortedNumbers) != 0 {
+		rgg = types.NewMostSortedShuffle(lottoInput)
 	} else {
-		rgg = types.NewRandomGameGenerator(newInputDTO)
+		rgg = types.NewRandomGameGenerator(lottoInput)
 	}
 
 	lotto := rgg.GenerateLottoCombination()

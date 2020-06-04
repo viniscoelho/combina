@@ -30,18 +30,18 @@ type randomGameGenerator struct {
 	alias string
 }
 
-func NewRandomGameGenerator(dto LottoInputDTO) *randomGameGenerator {
+func NewRandomGameGenerator(input LottoInput) *randomGameGenerator {
 	rgg := randomGameGenerator{}
 
 	rgg.generated = make(map[string]bool)
 	rgg.repeated = make(map[int]int)
-	rgg.fixedNumbers = make([]int, len(dto.FixedNumbers))
+	rgg.fixedNumbers = make([]int, len(input.FixedNumbers))
 
-	copy(rgg.fixedNumbers, dto.FixedNumbers)
+	copy(rgg.fixedNumbers, input.FixedNumbers)
 
-	rgg.numGames = *dto.NumGames
-	rgg.numEachGame = *dto.NumEachGame
-	rgg.gameRange = Games[*dto.GameType]
+	rgg.numGames = input.NumGames
+	rgg.numEachGame = input.NumEachGame
+	rgg.gameRange = Games[input.GameType]
 	numFixed := len(rgg.fixedNumbers)
 	maxRange := rgg.gameRange.Max
 
@@ -51,8 +51,8 @@ func NewRandomGameGenerator(dto LottoInputDTO) *randomGameGenerator {
 		rgg.maxUsage++
 	}
 
-	rgg.gameType = *dto.GameType
-	rgg.alias = *dto.Alias
+	rgg.gameType = input.GameType
+	rgg.alias = input.Alias
 
 	rgg.initialize()
 	return &rgg
@@ -150,5 +150,4 @@ func (rgg *randomGameGenerator) GenerateLottoCombination() Lotto {
 		CreatedOn: time.Now(),
 		Alias:     rgg.alias,
 	}
-
 }

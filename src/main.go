@@ -8,7 +8,7 @@ import (
 
 	"github.com/combina/src/db"
 	"github.com/combina/src/router"
-	"github.com/combina/src/storage/lottostore"
+	"github.com/combina/src/storage"
 	"github.com/rs/cors"
 )
 
@@ -19,7 +19,7 @@ func main() {
 		db.InitializeDatabase()
 	}
 
-	ls, err := lottostore.NewLottoBacked()
+	ls, err := storage.NewLottoBacked()
 	if err != nil {
 		log.Fatalf("could not initialize storage: %s", err)
 	}
