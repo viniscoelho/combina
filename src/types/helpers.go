@@ -71,20 +71,20 @@ func isValidNumbers(r MinMaxRange, numbers []int) bool {
 // isValidNumGames validates if the number of games chosen is
 // possible to be generated. It follows the combination formula:
 // nCr = n!/r!(n-r)!
-// n = maxValue-numFixed, r = numPicked-numFixed, c = n-r
-func isValidNumGames(numGames int64, maxRange, numPicked, numFixed int) bool {
-	n, r := maxRange-numFixed, numPicked-numFixed
+// n = maxValue-numFixed, r = numEachGame-numFixed, c = n-r
+func isValidNumGames(numGames int64, maxRange, numEachGame, numFixed int) bool {
+	n, r := maxRange-numFixed, numEachGame-numFixed
 	// if it reached this point of validation and r > 20,
 	// this means that it is a Lotomania game. Therefore,
 	// there is no need to do this calculation, because the
 	// number of games will be always valid.
-	if r > 20 {
+	if r > 20 || r > 9 {
 		return true
 	}
 
-	fact := make([]int64, 21)
+	fact := make([]int64, r+1)
 	fact[0], fact[1] = 1, 1
-	for i := 2; i <= 20; i++ {
+	for i := 2; i <= r; i++ {
 		fact[i] = fact[i-1] * int64(i)
 	}
 
