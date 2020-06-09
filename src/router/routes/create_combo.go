@@ -63,7 +63,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	lotto := rgg.GenerateLottoCombination()
-	err = h.cb.CreateCombination(lotto)
+	err = h.cb.AddCombination(lotto)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 

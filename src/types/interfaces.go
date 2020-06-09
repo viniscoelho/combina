@@ -42,8 +42,8 @@ type GameCombo struct {
 
 type LottoCombinator interface {
 	ListCombinations(gameType string) ([]Lotto, error)
-	CreateCombination(lotto Lotto) error
-	ReadCombination(id string) (Lotto, error)
+	AddCombination(lotto Lotto) error
+	FetchCombination(id string) (Lotto, error)
 	DeleteCombination(id string) error
 	EvaluateCombination(id string, results []int) (map[int]int, error)
 }

@@ -88,7 +88,7 @@ func (lb lottoBacked) ListCombinations(gameType string) ([]types.Lotto, error) {
 	return ll, nil
 }
 
-func (lb *lottoBacked) CreateCombination(lotto types.Lotto) error {
+func (lb *lottoBacked) AddCombination(lotto types.Lotto) error {
 	if _, ok := lb.storage[lotto.ID]; ok {
 		return types.CombinationAlreadyExistsError{}
 	}
@@ -114,7 +114,7 @@ func (lb *lottoBacked) CreateCombination(lotto types.Lotto) error {
 	return nil
 }
 
-func (lb lottoBacked) ReadCombination(id string) (types.Lotto, error) {
+func (lb lottoBacked) FetchCombination(id string) (types.Lotto, error) {
 	l, ok := lb.storage[id]
 	if !ok {
 		return types.Lotto{}, types.CombinationDoesNotExistError{}
@@ -143,18 +143,18 @@ func (lb *lottoBacked) DeleteCombination(id string) error {
 	return nil
 }
 
-func (lb lottoBacked) EvaluateCombination(id string, results []int) (map[int]int, error) {
+func (lb lottoBacked) EvaluateCombination(id string, result []int) (map[int]int, error) {
 	l, ok := lb.storage[id]
 	if !ok {
 		return nil, types.CombinationDoesNotExistError{}
 	}
 
-	lookup := make(map[int]bool)
-	for _, r := range results {
-		lookup[r] = true
+	lookup := make(map[int]struct{})
+	for _, r := range result {
+		lookup[r] = struct{}{}
 	}
 
-	ans := make(map[int]int)
+	scores := make(map[int]int)
 	for i := 0; i < l.Numbers.Rows; i++ {
 		var count int
 		for j := 0; j < l.Numbers.Columns; j++ {
@@ -163,8 +163,19 @@ func (lb lottoBacked) EvaluateCombination(id string, results []int) (map[int]int
 				count++
 			}
 		}
-		ans[count]++
+		scores[count]++
 	}
 
-	return ans, nil
+	return lb.filterResults(l.GameType, scores), nil
+}
+
+func (lb lottoBacked) filterResults(gameType string, scores map[int]int) map[int]int {
+	filtered := make(map[int]int)
+	for _, p := range types.Prizes[gameType] {
+		if _, ok := scores[p]; ok {
+			filtered[p] = scores[p]
+		}
+	}
+
+	return filtered
 }

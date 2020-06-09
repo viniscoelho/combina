@@ -3,9 +3,7 @@ package types
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/combina/src/types/ds"
 	"github.com/stretchr/testify/require"
@@ -102,46 +100,6 @@ func TestGenerateLottoCombination_RG_PossibleEntries(t *testing.T) {
 			ans, err := evaluateCombination(lotto, tc.result)
 			r.NoError(err)
 			log.Printf("num_games: %v -- results: %+v", tc.numGames, ans)
-		})
-	}
-}
-
-func TestGenerateLottoCombination_RG_SameGame(t *testing.T) {
-	r := require.New(t)
-
-	numGames := 250
-	numEach := 13
-	fixed := []int{}
-	mostSorted := []int{}
-	gameType := "Quina-Brasil"
-
-	dto := newLottoInputDTO(numGames, numEach, fixed, mostSorted, gameType)
-	input, err := NewLottoInput(dto)
-	r.NoError(err)
-
-	rgg := NewRandomGameGenerator(input)
-	lotto := rgg.GenerateLottoCombination()
-
-	cases := make([][]int, 0)
-	for i := 0; i < 50; i++ {
-		numbers := make([]int, 0)
-		for num := 1; num <= 80; num++ {
-			numbers = append(numbers, num)
-		}
-
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(numbers), func(i, j int) {
-			numbers[i], numbers[j] = numbers[j], numbers[i]
-		})
-
-		cases = append(cases, numbers[:5])
-	}
-	for i := 0; i < len(cases); i++ {
-		r := require.New(t)
-		t.Run("dummy", func(t *testing.T) {
-			ans, err := evaluateCombination(lotto, cases[i])
-			r.NoError(err)
-			log.Printf("results: %+v", ans)
 		})
 	}
 }

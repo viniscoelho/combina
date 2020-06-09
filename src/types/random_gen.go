@@ -67,7 +67,7 @@ func (rgg *randomGameGenerator) initialize() {
 	minRange, maxRange := rgg.gameRange.Min, rgg.gameRange.Max
 	for num := minRange; num <= maxRange; num++ {
 		if _, ok := fixed[num]; !ok {
-			rgg.repeated[num] = rgg.maxUsage
+			rgg.repeated[num] = rgg.maxUsage + 2
 		}
 	}
 }
@@ -132,8 +132,6 @@ func (rgg *randomGameGenerator) GenerateLottoCombination() Lotto {
 	for i := 0; i < rgg.numGames; i++ {
 		numbers := rgg.GenerateValidGame()
 		combination = append(combination, numbers)
-		// TODO: remove this comment
-		// fmt.Fprintf(os.Stdout, "Combo: %v Numbers: %+v\n", i, numbers)
 	}
 
 	id := uuid.New()

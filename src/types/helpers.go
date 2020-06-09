@@ -50,8 +50,12 @@ func isNumEachWithinRange(numEachGame int, gameType string) bool {
 		if numEachGame == 13 {
 			return true
 		}
+	case "Quininha":
+		if (numEachGame >= 15 && numEachGame <= 20) || numEachGame == 25 || numEachGame == 30 {
+			return true
+		}
 	case "Seninha":
-		if numEachGame == 20 {
+		if (numEachGame >= 14 && numEachGame <= 20) || numEachGame == 25 || numEachGame == 30 {
 			return true
 		}
 	}

@@ -21,7 +21,7 @@ func (h readCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	targetID := vars[idRouteVar]
 
-	lotto, err := h.cb.ReadCombination(targetID)
+	lotto, err := h.cb.FetchCombination(targetID)
 	if err != nil {
 		log.Printf("An error occured: %s", err)
 
