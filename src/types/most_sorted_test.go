@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/combina/src/types/ds"
+	"combina/src/types/ds"
 	"github.com/stretchr/testify/require"
 )
 

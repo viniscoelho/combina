@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/combina/src/db"
-	"github.com/combina/src/types"
+	"combina/src/db"
+	"combina/src/types"
 	"github.com/jackc/pgx/v4"
 )
 

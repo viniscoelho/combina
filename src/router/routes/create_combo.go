@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/combina/src/types"
+	"combina/src/types"
 )
 
 const idRouteVar = "id"

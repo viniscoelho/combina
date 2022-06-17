@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/combina/src/types"
+	"combina/src/types"
 	"github.com/stretchr/testify/require"
 )
 

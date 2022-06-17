@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/combina/src/types"
+	"combina/src/types"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 

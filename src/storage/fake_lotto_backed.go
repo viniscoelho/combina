@@ -3,7 +3,7 @@ package storage
 import (
 	"sort"
 
-	"github.com/combina/src/types"
+	"combina/src/types"
 )
 
 type fakeLottoBacked struct {

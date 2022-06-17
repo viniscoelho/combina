@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/combina/src/db"
-	"github.com/combina/src/router"
-	"github.com/combina/src/storage"
+	"combina/src/db"
+	"combina/src/router"
+	"combina/src/storage"
 	"github.com/rs/cors"
 )
 

@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
-	"github.com/combina/src/router/routes"
-	"github.com/combina/src/types"
+	"combina/src/router/routes"
+	"combina/src/types"
 	"github.com/gorilla/mux"
 )
 
