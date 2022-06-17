@@ -18,6 +18,10 @@ const (
 // or a pool that is closed while the acquire is waiting.
 var ErrClosedPool = errors.New("closed pool")
 
+// ErrNotAvailable occurs on an attempt to acquire a resource from a pool
+// that is at maximum capacity and has no available resources.
+var ErrNotAvailable = errors.New("resource not available")
+
 // Constructor is a function called by the pool to construct a resource.
 type Constructor func(ctx context.Context) (res interface{}, err error)
 
@@ -64,7 +68,7 @@ func (res *Resource) Destroy() {
 	if res.status != resourceStatusAcquired {
 		panic("tried to destroy resource that is not acquired")
 	}
-	res.pool.destroyAcquiredResource(res)
+	go res.pool.destroyAcquiredResource(res)
 }
 
 // Hijack assumes ownership of the resource from the pool. Caller is responsible
@@ -144,6 +148,10 @@ func NewPool(constructor Constructor, destructor Destructor, maxSize int32) *Poo
 // Blocks until all resources are returned to pool and destroyed.
 func (p *Pool) Close() {
 	p.cond.L.Lock()
+	if p.closed {
+		p.cond.L.Unlock()
+		return
+	}
 	p.closed = true
 
 	for _, res := range p.idleResources {
@@ -171,7 +179,9 @@ type Stat struct {
 	canceledAcquireCount  int64
 }
 
-// TotalResource returns the total number of resources.
+// TotalResource returns the total number of resources currently in the pool.
+// The value is the sum of ConstructingResources, AcquiredResources, and
+// IdleResources.
 func (s *Stat) TotalResources() int32 {
 	return s.constructingResources + s.acquiredResources + s.idleResources
 }
@@ -182,12 +192,12 @@ func (s *Stat) ConstructingResources() int32 {
 	return s.constructingResources
 }
 
-// AcquiredResources returns the number of acquired resources in the pool.
+// AcquiredResources returns the number of currently acquired resources in the pool.
 func (s *Stat) AcquiredResources() int32 {
 	return s.acquiredResources
 }
 
-// IdleResources returns the number of idle resources in the pool.
+// IdleResources returns the number of currently idle resources in the pool.
 func (s *Stat) IdleResources() int32 {
 	return s.idleResources
 }
@@ -197,7 +207,7 @@ func (s *Stat) MaxResources() int32 {
 	return s.maxResources
 }
 
-// AcquireCount returns the number of successful acquires from the pool.
+// AcquireCount returns the cumulative count of successful acquires from the pool.
 func (s *Stat) AcquireCount() int64 {
 	return s.acquireCount
 }
@@ -208,14 +218,14 @@ func (s *Stat) AcquireDuration() time.Duration {
 	return s.acquireDuration
 }
 
-// EmptyAcquireCount returns the number of successful acquires from the pool
+// EmptyAcquireCount returns the cumulative count of successful acquires from the pool
 // that waited for a resource to be released or constructed because the pool was
 // empty.
 func (s *Stat) EmptyAcquireCount() int64 {
 	return s.emptyAcquireCount
 }
 
-// CanceledAcquireCount returns the number of acquires from the pool
+// CanceledAcquireCount returns the cumulative count of acquires from the pool
 // that were canceled by a context.
 func (s *Stat) CanceledAcquireCount() int64 {
 	return s.canceledAcquireCount
@@ -253,16 +263,18 @@ func (p *Pool) Stat() *Stat {
 // to cancel the Acquire.
 func (p *Pool) Acquire(ctx context.Context) (*Resource, error) {
 	startNano := nanotime()
-	p.cond.L.Lock()
 	if doneChan := ctx.Done(); doneChan != nil {
 		select {
 		case <-ctx.Done():
+			p.cond.L.Lock()
 			p.canceledAcquireCount += 1
 			p.cond.L.Unlock()
 			return nil, ctx.Err()
 		default:
 		}
 	}
+
+	p.cond.L.Lock()
 
 	emptyAcquire := false
 
@@ -275,6 +287,7 @@ func (p *Pool) Acquire(ctx context.Context) (*Resource, error) {
 		// If a resource is available now
 		if len(p.idleResources) > 0 {
 			res := p.idleResources[len(p.idleResources)-1]
+			p.idleResources[len(p.idleResources)-1] = nil // Avoid memory leak
 			p.idleResources = p.idleResources[:len(p.idleResources)-1]
 			res.status = resourceStatusAcquired
 			if emptyAcquire {
@@ -310,6 +323,7 @@ func (p *Pool) Acquire(ctx context.Context) (*Resource, error) {
 				}
 
 				p.cond.L.Unlock()
+				p.cond.Signal()
 				return nil, err
 			}
 
@@ -352,18 +366,68 @@ func (p *Pool) Acquire(ctx context.Context) (*Resource, error) {
 	}
 }
 
+// TryAcquire gets a resource from the pool if one is immediately available. If not, it returns ErrNotAvailable. If no
+// resources are available but the pool has room to grow, a resource will be created in the background. ctx is only
+// used to cancel the background creation.
+func (p *Pool) TryAcquire(ctx context.Context) (*Resource, error) {
+	p.cond.L.Lock()
+	defer p.cond.L.Unlock()
+
+	if p.closed {
+		return nil, ErrClosedPool
+	}
+
+	// If a resource is available now
+	if len(p.idleResources) > 0 {
+		res := p.idleResources[len(p.idleResources)-1]
+		p.idleResources[len(p.idleResources)-1] = nil // Avoid memory leak
+		p.idleResources = p.idleResources[:len(p.idleResources)-1]
+		p.acquireCount += 1
+		res.status = resourceStatusAcquired
+		return res, nil
+	}
+
+	if len(p.allResources) < int(p.maxSize) {
+		res := &Resource{pool: p, creationTime: time.Now(), lastUsedNano: nanotime(), status: resourceStatusConstructing}
+		p.allResources = append(p.allResources, res)
+		p.destructWG.Add(1)
+
+		go func() {
+			value, err := p.constructResourceValue(ctx)
+			defer p.cond.Signal()
+			p.cond.L.Lock()
+			defer p.cond.L.Unlock()
+
+			if err != nil {
+				p.allResources = removeResource(p.allResources, res)
+				p.destructWG.Done()
+				return
+			}
+
+			res.value = value
+			res.status = resourceStatusIdle
+			p.idleResources = append(p.idleResources, res)
+		}()
+	}
+
+	return nil, ErrNotAvailable
+}
+
 // AcquireAllIdle atomically acquires all currently idle resources. Its intended
 // use is for health check and keep-alive functionality. It does not update pool
 // statistics.
 func (p *Pool) AcquireAllIdle() []*Resource {
 	p.cond.L.Lock()
+	if p.closed {
+		p.cond.L.Unlock()
+		return nil
+	}
 
 	for _, res := range p.idleResources {
 		res.status = resourceStatusAcquired
 	}
-	resources := make([]*Resource, len(p.idleResources))
-	copy(resources, p.idleResources)
-	p.idleResources = p.idleResources[0:0]
+	resources := p.idleResources // Swap out current slice
+	p.idleResources = nil
 
 	p.cond.L.Unlock()
 	return resources
@@ -373,6 +437,12 @@ func (p *Pool) AcquireAllIdle() []*Resource {
 // It goes straight in the IdlePool. It does not check against maxSize.
 // It can be useful to maintain warm resources under little load.
 func (p *Pool) CreateResource(ctx context.Context) error {
+	p.cond.L.Lock()
+	if p.closed {
+		p.cond.L.Unlock()
+		return ErrClosedPool
+	}
+	p.cond.L.Unlock()
 
 	value, err := p.constructResourceValue(ctx)
 	if err != nil {
@@ -386,11 +456,17 @@ func (p *Pool) CreateResource(ctx context.Context) error {
 		value:        value,
 		lastUsedNano: nanotime(),
 	}
+	p.destructWG.Add(1)
 
 	p.cond.L.Lock()
+	// If closed while constructing resource then destroy it and return an error
+	if p.closed {
+		go p.destructResourceValue(res.value)
+		p.cond.L.Unlock()
+		return ErrClosedPool
+	}
 	p.allResources = append(p.allResources, res)
 	p.idleResources = append(p.idleResources, res)
-	p.destructWG.Add(1)
 	p.cond.L.Unlock()
 
 	return nil
@@ -416,11 +492,9 @@ func (p *Pool) releaseAcquiredResource(res *Resource, lastUsedNano int64) {
 // Remove removes res from the pool and closes it. If res is not part of the
 // pool Remove will panic.
 func (p *Pool) destroyAcquiredResource(res *Resource) {
+	p.destructResourceValue(res.value)
 	p.cond.L.Lock()
-
 	p.allResources = removeResource(p.allResources, res)
-	go p.destructResourceValue(res.value)
-
 	p.cond.L.Unlock()
 	p.cond.Signal()
 }
@@ -440,6 +514,7 @@ func removeResource(slice []*Resource, res *Resource) []*Resource {
 	for i := range slice {
 		if slice[i] == res {
 			slice[i] = slice[len(slice)-1]
+			slice[len(slice)-1] = nil // Avoid memory leak
 			return slice[:len(slice)-1]
 		}
 	}
