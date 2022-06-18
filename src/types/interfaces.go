@@ -1,7 +1,11 @@
-//go:generate mockgen -destination=mocks/mocks.go -package=mocks combina/src/types Combination
+//go:generate mockgen -destination=mocks/mocks.go -package=mocks combina/src/types LottoCombinator,RandomGameGenerator
 package types
 
-import "time"
+import (
+	"time"
+
+	_ "github.com/golang/mock/mockgen/model"
+)
 
 type MinMaxRange struct {
 	Min int
