@@ -20,7 +20,7 @@ func (h listCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	gameType := r.FormValue("type")
 	lotto, err := h.cb.ListCombinations(gameType)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 
 		switch err.(type) {
 		case types.GameTypeDoesNotExistError:
@@ -36,7 +36,7 @@ func (h listCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	content, err := json.Marshal(lotto)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("internal server error"))
 		return

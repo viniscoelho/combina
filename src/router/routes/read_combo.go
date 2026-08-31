@@ -23,7 +23,7 @@ func (h readCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	lotto, err := h.cb.FetchCombination(targetID)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 
 		switch err.(type) {
 		case types.CombinationDoesNotExistError:
@@ -39,7 +39,7 @@ func (h readCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	content, err := json.Marshal(lotto)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("internal server error"))
 		return

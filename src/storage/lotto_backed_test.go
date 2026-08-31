@@ -40,7 +40,7 @@ func TestGenerateLottoCombination_RG_SameGame(t *testing.T) {
 	input, err := types.NewLottoInput(dto)
 	r.NoError(err)
 
-	rgg := types.NewRandomGameGenerator(input)
+	rgg := types.NewRandomGameGenerator(input, nil)
 	lotto := rgg.GenerateLottoCombination()
 
 	lb, err := NewFakeLottoBacked()

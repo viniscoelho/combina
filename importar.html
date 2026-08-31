@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+
+<script type="text/javascript" src="common/header.js"></script>
+
+<body>
+  <script type="text/javascript" src="common/menu.js"></script>
+
+  <!-- Step 1: upload -->
+  <div class="centered">
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Qual jogo deseja importar?</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="gameType" class="form-control input-width at-right">
+          <option value="">Selecione...</option>
+          <option value="Lotofacil">Lotofácil</option>
+          <option value="Mega-Sena">Mega-Sena</option>
+          <option value="Quina">Quina</option>
+          <option value="Lotomania">Lotomania</option>
+          <option value="Quina-Brasil">Quina Brasil</option>
+          <option value="Quininha">Quininha</option>
+          <option value="Seninha">Seninha</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="div-table-row" style="margin-top:10px;">
+      <div class="div-table-col-a">
+        <strong>Arquivo de jogos (um por linha):</strong>
+      </div>
+      <div class="div-table-col-b">
+        <input type="file" id="gameFile" accept=".txt,.csv" class="at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row" style="margin-top:10px;">
+      <div class="div-table-col-a">
+        <strong>Separador dos números na linha:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="separator" class="form-control input-width at-right">
+          <option value=",">Vírgula ( , )</option>
+          <option value=";">Ponto e vírgula ( ; )</option>
+          <option value=" ">Espaço</option>
+          <option value="	">Tab</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="buttons" style="margin-top:10px;">
+      <button id="btnImport" type="button" class="btn btn-primary">Carregar jogos</button>
+    </div>
+
+    <div id="importFeedback" style="margin-top:8px; color:#555;"></div>
+  </div>
+
+  <!-- Step 2: generate (hidden until import succeeds) -->
+  <div id="generateSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Quantidade de jogos a gerar:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <input id="numGames" type="number" min="1" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row" style="margin-top:6px;">
+      <div class="div-table-col-a">
+        <strong>Números por jogo:</strong>
+        <span id="numEachHint" style="font-size:13px; color:#666;"></span>
+      </div>
+      <div class="div-table-col-b">
+        <input id="numEach" type="number" min="1" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row" style="margin-top:6px;">
+      <div class="div-table-col-a">
+        <strong>Nome do conjunto (opcional):</strong>
+      </div>
+      <div class="div-table-col-b">
+        <input id="alias" type="text" maxlength="50" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="buttons" style="margin-top:10px;">
+      <button id="btnGenerate" type="button" class="btn btn-success">Gerar jogos</button>
+    </div>
+
+    <div id="generateFeedback" style="margin-top:8px; color:#555;"></div>
+  </div>
+
+  <!-- Games table -->
+  <div id="gamesSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <h3 id="gamesTitle" style="margin-bottom:10px;"></h3>
+    <table id="gamesTable" class="table" style="border-collapse:collapse;">
+      <thead id="gamesHead"></thead>
+      <tbody id="gamesBody"></tbody>
+    </table>
+  </div>
+
+  <script type="text/javascript">
+    var loadedGames = [];
+    var loadedGameType = '';
+
+    var gameHints = {
+      'Lotofacil':    '15 a 18',
+      'Mega-Sena':    '6 a 15',
+      'Quina':        '5 a 15',
+      'Lotomania':    '50',
+      'Quina-Brasil': '13',
+      'Quininha':     '15 a 20, 25 ou 30',
+      'Seninha':      '14 a 20, 25 ou 30'
+    };
+
+    document.getElementById('btnImport').addEventListener('click', function () {
+      var gameType = document.getElementById('gameType').value;
+      var fileInput = document.getElementById('gameFile');
+
+      if (!gameType) {
+        document.getElementById('importFeedback').innerText = 'Selecione o tipo de jogo.';
+        return;
+      }
+      if (!fileInput.files || !fileInput.files[0]) {
+        document.getElementById('importFeedback').innerText = 'Selecione um arquivo.';
+        return;
+      }
+
+      var formData = new FormData();
+      formData.append('game_type', gameType);
+      formData.append('separator', document.getElementById('separator').value);
+      formData.append('file', fileInput.files[0]);
+
+      document.getElementById('importFeedback').innerText = 'Carregando...';
+
+      $.ajax({
+        url: 'http://localhost:3000/combinations/import',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          loadedGames = data.games || [];
+          loadedGameType = data.game_type;
+          var msg = loadedGames.length + ' jogo(s) válido(s) carregado(s).';
+          if (data.discarded > 0) msg += ' ' + data.discarded + ' linha(s) descartada(s).';
+          document.getElementById('importFeedback').innerText = msg;
+
+          document.getElementById('numEachHint').innerText = ' (válido: ' + (gameHints[loadedGameType] || '') + ')';
+          document.getElementById('generateSection').style.display = '';
+          renderGamesTable(loadedGames, []);
+        },
+        error: function (xhr) {
+          document.getElementById('importFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+        }
+      });
+    });
+
+    document.getElementById('btnGenerate').addEventListener('click', function () {
+      var numGames = parseInt(document.getElementById('numGames').value);
+      var numEach  = parseInt(document.getElementById('numEach').value);
+      var alias    = document.getElementById('alias').value.trim() || 'default';
+
+      if (!numGames || numGames < 1) {
+        document.getElementById('generateFeedback').innerText = 'Informe a quantidade de jogos.';
+        return;
+      }
+      if (!numEach || numEach < 1) {
+        document.getElementById('generateFeedback').innerText = 'Informe quantos números por jogo.';
+        return;
+      }
+
+      document.getElementById('generateFeedback').innerText = 'Gerando...';
+
+      var body = JSON.stringify({
+        game_type:      loadedGameType,
+        num_games:      numGames,
+        num_each:       numEach,
+        existing_games: loadedGames,
+        alias:          alias
+      });
+
+      $.ajax({
+        beforeSend: function (req) {
+          req.setRequestHeader('Content-Type', 'application/json');
+          req.setRequestHeader('Accept', 'application/json');
+        },
+        url: 'http://localhost:3000/combinations/generate-from',
+        type: 'POST',
+        data: body,
+        dataType: 'json',
+        success: function (data) {
+          var generated = (data && data.numbers && data.numbers.combination) ? data.numbers.combination : [];
+          document.getElementById('generateFeedback').innerText = generated.length + ' jogo(s) gerado(s) e salvo(s).';
+          renderGamesTable(loadedGames, generated);
+        },
+        error: function (xhr) {
+          document.getElementById('generateFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+        }
+      });
+    });
+
+    function renderGamesTable(imported, generated) {
+      var head = document.getElementById('gamesHead');
+      var body = document.getElementById('gamesBody');
+      head.innerHTML = '';
+      body.innerHTML = '';
+
+      document.getElementById('gamesSection').style.display = '';
+      document.getElementById('gamesTitle').innerText =
+        'Jogos importados (' + imported.length + ') + gerados (' + generated.length + ')';
+
+      var allGames = imported.map(function (g) { return { nums: g, isGenerated: false }; })
+                      .concat(generated.map(function (g) { return { nums: g, isGenerated: true }; }));
+
+      var maxCols = 0;
+      allGames.forEach(function (g) { if (g.nums.length > maxCols) maxCols = g.nums.length; });
+
+      // header
+      var tr = document.createElement('tr');
+      var th = document.createElement('th');
+      th.innerText = '#';
+      th.style.padding = '4px 8px';
+      tr.appendChild(th);
+      for (var c = 1; c <= maxCols; c++) {
+        th = document.createElement('th');
+        th.innerText = c;
+        th.style.padding = '4px 8px';
+        tr.appendChild(th);
+      }
+      head.appendChild(tr);
+
+      // rows
+      allGames.forEach(function (g, idx) {
+        var row = document.createElement('tr');
+        if (g.isGenerated) row.className = 'table-success';
+
+        var td = document.createElement('td');
+        td.style.padding = '3px 8px';
+        td.style.fontWeight = 'bold';
+        td.innerText = idx + 1;
+        row.appendChild(td);
+
+        g.nums.forEach(function (n) {
+          td = document.createElement('td');
+          td.style.padding = '3px 8px';
+          td.innerText = n < 10 ? '0' + n : n;
+          row.appendChild(td);
+        });
+        body.appendChild(row);
+      });
+    }
+  </script>
+
+  <script type="text/javascript" src="common/footer.js"></script>
+</body>
+
+</html>

@@ -23,7 +23,7 @@ func TestGenerateValidGame_RG_NoRepeatedNumbers(t *testing.T) {
 
 	for i := 0; i < maxRepetitions; i++ {
 		counter := make(map[int]bool)
-		rgg := NewRandomGameGenerator(input)
+		rgg := NewRandomGameGenerator(input, nil)
 		game := rgg.GenerateValidGame()
 
 		for _, num := range game {
@@ -47,7 +47,7 @@ func TestGenerateLottoCombination_RG(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	rgg := NewRandomGameGenerator(input)
+	rgg := NewRandomGameGenerator(input, nil)
 	lotto := rgg.GenerateLottoCombination()
 	r.Equal(*dto.NumGames, lotto.Numbers.Rows)
 	r.Equal(*dto.NumEachGame, lotto.Numbers.Columns)
@@ -95,7 +95,7 @@ func TestGenerateLottoCombination_RG_PossibleEntries(t *testing.T) {
 			input, err := NewLottoInput(dto)
 			r.NoError(err)
 
-			rgg := NewRandomGameGenerator(input)
+			rgg := NewRandomGameGenerator(input, nil)
 			lotto := rgg.GenerateLottoCombination()
 			ans, err := evaluateCombination(lotto, tc.result)
 			r.NoError(err)

@@ -26,9 +26,9 @@ func NewLottoInput(dto LottoInputDTO) (LottoInput, error) {
 	return li, nil
 }
 
-// isNumEachWithinRange validates if the amount of picked numbers
+// IsNumEachWithinRange validates if the amount of picked numbers
 // is valid according to the official lottery rules
-func isNumEachWithinRange(numEachGame int, gameType string) bool {
+func IsNumEachWithinRange(numEachGame int, gameType string) bool {
 	switch gameType {
 	case "Lotofacil":
 		if numEachGame >= 15 && numEachGame <= 18 {
@@ -152,7 +152,7 @@ func validateInputDTO(dto LottoInputDTO) error {
 		return InvalidDTOError{Message: "amount of most sorted numbers cannot be greater than remaining numbers"}
 	}
 
-	if !isNumEachWithinRange(*dto.NumEachGame, *dto.GameType) {
+	if !IsNumEachWithinRange(*dto.NumEachGame, *dto.GameType) {
 		return InvalidDTOError{Message: "amount of picked numbers should be within a valid range"}
 	}
 

@@ -24,7 +24,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("internal server error"))
 		return
@@ -33,7 +33,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	dto := types.LottoInputDTO{}
 	err = json.Unmarshal(body, &dto)
 	if err != nil {
-		log.Printf("An error occured during unmarshal: %s", err)
+		log.Printf("An error occurred during unmarshal: %s", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("internal server error"))
 		return
@@ -41,7 +41,7 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	lottoInput, err := types.NewLottoInput(dto)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 
 		switch err.(type) {
 		case types.MissingFieldsError, types.InvalidDTOError:
@@ -57,15 +57,15 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	var rgg types.RandomGameGenerator
 	if len(lottoInput.MostSortedNumbers) != 0 {
-		rgg = types.NewMostSortedShuffle(lottoInput)
+		rgg = types.NewMostSortedShuffle(lottoInput, nil)
 	} else {
-		rgg = types.NewRandomGameGenerator(lottoInput)
+		rgg = types.NewRandomGameGenerator(lottoInput, nil)
 	}
 
 	lotto := rgg.GenerateLottoCombination()
 	err = h.cb.AddCombination(lotto)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 
 		switch err.(type) {
 		case types.CombinationAlreadyExistsError:

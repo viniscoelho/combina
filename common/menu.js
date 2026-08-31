@@ -6,10 +6,10 @@ document.write(`
     <table class='menu centered'>
       <tr>
         <td><a href='combina.html'>Gerar jogos</a></td>
+        <td><a href='importar.html'>Importar jogos</a></td>
         <td><a href='combina.html'>Listar jogos</a></td>
         <td><a href='combina.html'>Conferir jogos</a></td>
         <td><a href='combina.html'>Créditos</a></td>
-        <td><a href='combina.html'>Contato</a></td>
       </tr>
     </table>
   </div>`)

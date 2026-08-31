@@ -19,6 +19,14 @@ func CreateRoutes(cb types.LottoCombinator) *mux.Router {
 		Methods(http.MethodPost).
 		Name("CreateCombination").
 		Handler(routes.NewCreateComboHandler(cb))
+	r.Path("/combinations/import").
+		Methods(http.MethodPost).
+		Name("ImportCombinations").
+		Handler(routes.NewImportComboHandler(cb))
+	r.Path("/combinations/generate-from").
+		Methods(http.MethodPost).
+		Name("GenerateFrom").
+		Handler(routes.NewGenerateFromHandler(cb))
 	r.Path("/combinations/{id}").
 		Methods(http.MethodGet).
 		Name("ReadCombination").

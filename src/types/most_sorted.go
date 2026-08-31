@@ -34,7 +34,7 @@ type fisherYatesModified struct {
 	alias string
 }
 
-func NewMostSortedShuffle(input LottoInput) *fisherYatesModified {
+func NewMostSortedShuffle(input LottoInput, existing [][]int) *fisherYatesModified {
 	fy := fisherYatesModified{}
 
 	fy.generated = make(map[string]bool)
@@ -61,6 +61,14 @@ func NewMostSortedShuffle(input LottoInput) *fisherYatesModified {
 	fy.alias = input.Alias
 
 	fy.initialize()
+
+	for _, game := range existing {
+		g := make([]int, len(game))
+		copy(g, game)
+		sort.Ints(g)
+		fy.generated[fmt.Sprintf("%+v", g)] = true
+	}
+
 	return &fy
 }
 

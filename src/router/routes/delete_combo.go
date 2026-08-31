@@ -22,7 +22,7 @@ func (h deleteCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	err := h.cb.DeleteCombination(targetID)
 	if err != nil {
-		log.Printf("An error occured: %s", err)
+		log.Printf("An error occurred: %s", err)
 
 		switch err.(type) {
 		case types.CombinationDoesNotExistError:

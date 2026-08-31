@@ -50,7 +50,7 @@ func TestPickRandomValue(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	rgg := NewMostSortedShuffle(input)
+	rgg := NewMostSortedShuffle(input, nil)
 
 	numbersK, numbersNK := make([]int, len(rgg.mostSortedNumbers)), make([]int, len(rgg.remainingNumbers))
 	copy(numbersK, rgg.mostSortedNumbers)

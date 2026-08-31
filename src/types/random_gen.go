@@ -30,7 +30,7 @@ type randomGameGenerator struct {
 	alias string
 }
 
-func NewRandomGameGenerator(input LottoInput) *randomGameGenerator {
+func NewRandomGameGenerator(input LottoInput, existing [][]int) *randomGameGenerator {
 	rgg := randomGameGenerator{}
 
 	rgg.generated = make(map[string]bool)
@@ -55,6 +55,14 @@ func NewRandomGameGenerator(input LottoInput) *randomGameGenerator {
 	rgg.alias = input.Alias
 
 	rgg.initialize()
+
+	for _, game := range existing {
+		g := make([]int, len(game))
+		copy(g, game)
+		sort.Ints(g)
+		rgg.generated[fmt.Sprintf("%+v", g)] = true
+	}
+
 	return &rgg
 }
 

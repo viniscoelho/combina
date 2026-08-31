@@ -33,7 +33,7 @@ func TestGenerateValidGame_MS_NoRepeatedNumbers(t *testing.T) {
 
 	for i := 0; i < maxRepetitions; i++ {
 		counter := make(map[int]bool)
-		rgg := NewMostSortedShuffle(input)
+		rgg := NewMostSortedShuffle(input, nil)
 		game := rgg.GenerateValidGame()
 
 		for _, num := range game {
@@ -57,7 +57,7 @@ func TestGenerateLottoCombination_MS(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	rgg := NewMostSortedShuffle(input)
+	rgg := NewMostSortedShuffle(input, nil)
 	lotto := rgg.GenerateLottoCombination()
 	r.Equal(*dto.NumGames, lotto.Numbers.Rows)
 	r.Equal(*dto.NumEachGame, lotto.Numbers.Columns)
@@ -115,7 +115,7 @@ func TestGenerateLottoCombination_MS_PossibleEntries(t *testing.T) {
 			input, err := NewLottoInput(dto)
 			r.NoError(err)
 
-			rgg := NewMostSortedShuffle(input)
+			rgg := NewMostSortedShuffle(input, nil)
 			lotto := rgg.GenerateLottoCombination()
 			ans, err := evaluateCombination(lotto, tc.result)
 			r.NoError(err)
