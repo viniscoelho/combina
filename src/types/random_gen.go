@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"math/rand"
 	"sort"
 	"time"
@@ -10,8 +9,8 @@ import (
 )
 
 type randomGameGenerator struct {
-	// A map to store each combination that has been generated
-	generated map[string]bool
+	// Rejects games that duplicate or are subsets of already-seen games
+	dedup *dedupIndex
 	// A map to count how many times a number has been used
 	repeated map[int]int
 	// A slice having the fixed numbers
@@ -40,7 +39,6 @@ type randomGameGenerator struct {
 func NewRandomGameGenerator(input LottoInput, existing [][]int) *randomGameGenerator {
 	rgg := randomGameGenerator{}
 
-	rgg.generated = make(map[string]bool)
 	rgg.repeated = make(map[int]int)
 	rgg.fixedNumbers = make([]int, len(input.FixedNumbers))
 
@@ -66,14 +64,7 @@ func NewRandomGameGenerator(input LottoInput, existing [][]int) *randomGameGener
 
 	rgg.initialize()
 
-	// Mark existing games as already generated so they are skipped during
-	// production of new games.
-	for _, game := range existing {
-		g := make([]int, len(game))
-		copy(g, game)
-		sort.Ints(g)
-		rgg.generated[fmt.Sprintf("%+v", g)] = true
-	}
+	rgg.dedup = newDedupIndex(existing, rgg.numEachGame)
 
 	return &rgg
 }
@@ -154,11 +145,10 @@ func (rgg *randomGameGenerator) GenerateValidGame() []int {
 			return numbers[i] < numbers[j]
 		})
 
-		hashedNumbers := fmt.Sprintf("%+v", numbers)
-		if _, ok := rgg.generated[hashedNumbers]; ok {
+		if rgg.dedup.isDuplicate(numbers) {
 			continue
 		}
-		rgg.generated[hashedNumbers] = true
+		rgg.dedup.record(numbers)
 
 		// Decrement usage counters only for non-fixed numbers; fixed numbers
 		// are not tracked in repeated and must not be touched.

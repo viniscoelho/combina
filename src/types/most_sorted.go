@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"math/rand"
 	"sort"
 	"time"
@@ -10,8 +9,8 @@ import (
 )
 
 type fisherYatesModified struct {
-	// A map to store each combination that has been generated
-	generated map[string]bool
+	// Rejects games that duplicate or are subsets of already-seen games
+	dedup *dedupIndex
 	// A map to count how many times a number has been used
 	repeated map[int]int
 	// A slice having the fixed numbers
@@ -44,7 +43,6 @@ type fisherYatesModified struct {
 func NewMostSortedShuffle(input LottoInput, existing [][]int) *fisherYatesModified {
 	fy := fisherYatesModified{}
 
-	fy.generated = make(map[string]bool)
 	fy.repeated = make(map[int]int)
 	fy.fixedNumbers = make([]int, len(input.FixedNumbers))
 	fy.mostSortedNumbers = make([]int, len(input.MostSortedNumbers))
@@ -71,14 +69,7 @@ func NewMostSortedShuffle(input LottoInput, existing [][]int) *fisherYatesModifi
 
 	fy.initialize()
 
-	// Mark existing games as already generated so they are skipped during
-	// production of new games.
-	for _, game := range existing {
-		g := make([]int, len(game))
-		copy(g, game)
-		sort.Ints(g)
-		fy.generated[fmt.Sprintf("%+v", g)] = true
-	}
+	fy.dedup = newDedupIndex(existing, fy.numEachGame)
 
 	return &fy
 }
@@ -216,11 +207,10 @@ func (fy *fisherYatesModified) GenerateValidGame() []int {
 			return numbers[i] < numbers[j]
 		})
 
-		hashedNumbers := fmt.Sprintf("%+v", numbers)
-		if _, ok := fy.generated[hashedNumbers]; ok {
+		if fy.dedup.isDuplicate(numbers) {
 			continue
 		}
-		fy.generated[hashedNumbers] = true
+		fy.dedup.record(numbers)
 
 		// Decrement usage counters only for non-fixed numbers; fixed numbers
 		// are not tracked in repeated and must not be touched.
