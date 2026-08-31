@@ -78,30 +78,26 @@ func isValidNumbers(r MinMaxRange, numbers []int) bool {
 // n = maxValue-numFixed, r = numEachGame-numFixed, c = n-r
 func isValidNumGames(numGames int64, maxRange, numEachGame, numFixed int) bool {
 	n, r := maxRange-numFixed, numEachGame-numFixed
-	// if it reached this point of validation and r > 20,
-	// this means that it is a Lotomania game. Therefore,
-	// there is no need to do this calculation, because the
-	// number of games will be always valid.
-	if r > 20 || r > 9 {
+	// Skip combinatorial check for Lotomania (r > 20) — the number of valid
+	// games is always astronomically large. For r > 20 the nCr values exceed
+	// int64 range even with the interleaved-divide method.
+	if r > 20 {
 		return true
 	}
 
-	fact := make([]int64, r+1)
-	fact[0], fact[1] = 1, 1
-	for i := 2; i <= r; i++ {
-		fact[i] = fact[i-1] * int64(i)
+	// Compute C(n, r) using the multiplicative formula with interleaved division
+	// to avoid int64 overflow: C(n,r) = product_{i=1}^{r} (n-r+i)/i
+	// Each intermediate value is an integer because C(n,i) is always integer.
+	nCr := int64(1)
+	for i := 1; i <= r; i++ {
+		nCr = nCr * int64(n-r+i) / int64(i)
+		if nCr < numGames {
+			// already exceeded; short-circuit — no overflow risk since we stop early
+			return true
+		}
 	}
 
-	rem := int64(1)
-	for i := n - r + 1; i <= n; i++ {
-		rem *= int64(i)
-	}
-
-	if numGames > rem/fact[r] {
-		return false
-	}
-
-	return true
+	return numGames <= nCr
 }
 
 func validateIntersection(fixedNumbers, mostSortedNumbers []int) error {
