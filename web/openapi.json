@@ -1,0 +1,275 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Combina API",
+    "version": "1.0.0",
+    "description": "Lottery combination generation and evaluation API."
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "paths": {
+    "/combinations": {
+      "get": {
+        "summary": "List combinations",
+        "operationId": "listCombinations",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by game type (e.g. Lotofacil, Mega-Sena)",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of combinations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Lotto" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid game type", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      },
+      "post": {
+        "summary": "Create combination",
+        "operationId": "createCombination",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LottoInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "Location": { "schema": { "type": "string" }, "description": "ID of the new combination" }
+            }
+          },
+          "400": { "description": "Missing or invalid fields", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "409": { "description": "Combination already exists", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      }
+    },
+    "/combinations/{id}": {
+      "get": {
+        "summary": "Get combination by ID",
+        "operationId": "getCombination",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Combination",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Lotto" } } }
+          },
+          "404": { "description": "Not found", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete combination",
+        "operationId": "deleteCombination",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "404": { "description": "Not found", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      }
+    },
+    "/combinations/evaluate/{id}": {
+      "get": {
+        "summary": "Evaluate combination against drawn numbers",
+        "operationId": "evaluateCombination",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "values",
+            "in": "query",
+            "required": true,
+            "description": "JSON-encoded array of drawn numbers, e.g. [1,5,12,23,45]",
+            "schema": { "type": "string", "example": "[1,5,12,23,45]" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hit counts per prize tier. Keys are hit counts, values are the number of games achieving that count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { "type": "integer" },
+                  "example": { "15": 1, "14": 3 }
+                }
+              }
+            }
+          },
+          "404": { "description": "Combination not found", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      }
+    },
+    "/combinations/import": {
+      "post": {
+        "summary": "Import games from a text file",
+        "operationId": "importCombinations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["game_type", "file"],
+                "properties": {
+                  "game_type": {
+                    "type": "string",
+                    "description": "Game type (e.g. Lotofacil, Mega-Sena)"
+                  },
+                  "separator": {
+                    "type": "string",
+                    "description": "Number separator in each line. Defaults to comma.",
+                    "enum": [",", ";", " ", "\t"],
+                    "default": ","
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Text file with one game per line"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parsed games",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ImportResponse" }
+              }
+            }
+          },
+          "400": { "description": "Invalid form data or game type", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      }
+    },
+    "/combinations/generate-from": {
+      "post": {
+        "summary": "Generate new games combined with existing imported games",
+        "operationId": "generateFrom",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GenerateFromInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created combination containing imported + generated games",
+            "headers": {
+              "Location": { "schema": { "type": "string" }, "description": "ID of the new combination" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Lotto" }
+              }
+            }
+          },
+          "400": { "description": "Missing or invalid fields", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "409": { "description": "Combination already exists", "content": { "text/plain": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "text/plain": { "schema": { "type": "string" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GameCombo": {
+        "type": "object",
+        "properties": {
+          "combination": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": "integer" } },
+            "description": "List of games, each game is a list of numbers"
+          },
+          "rows": { "type": "integer", "description": "Number of games" },
+          "cols": { "type": "integer", "description": "Numbers per game (generated games)" }
+        }
+      },
+      "Lotto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "numbers": { "$ref": "#/components/schemas/GameCombo" },
+          "game_type": { "type": "string", "example": "Lotofacil" },
+          "created_on": { "type": "string", "format": "date-time" },
+          "alias": { "type": "string", "example": "meus jogos" }
+        }
+      },
+      "LottoInput": {
+        "type": "object",
+        "required": ["num_games", "num_each", "game_type"],
+        "properties": {
+          "num_games": { "type": "integer", "example": 5 },
+          "num_each": { "type": "integer", "example": 15 },
+          "fixed_numbers": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that must appear in every game"
+          },
+          "most_sorted": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that are favored (7:3 probability ratio) when non-empty"
+          },
+          "game_type": { "type": "string", "example": "Lotofacil" },
+          "alias": { "type": "string", "example": "meus jogos" }
+        }
+      },
+      "GenerateFromInput": {
+        "type": "object",
+        "required": ["game_type", "num_games", "num_each"],
+        "properties": {
+          "game_type": { "type": "string", "example": "Lotofacil" },
+          "num_games": { "type": "integer", "example": 3 },
+          "num_each": { "type": "integer", "example": 15 },
+          "existing_games": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": "integer" } },
+            "description": "Games previously imported; stored alongside the generated ones"
+          },
+          "alias": { "type": "string", "example": "meus jogos" }
+        }
+      },
+      "ImportResponse": {
+        "type": "object",
+        "properties": {
+          "games": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": "integer" } }
+          },
+          "game_type": { "type": "string" },
+          "discarded": { "type": "integer", "description": "Number of invalid lines skipped" }
+        }
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@ document.write(`
         <td><a href='listar.html'>Listar jogos</a></td>
         <td><a href='conferir.html'>Conferir jogos</a></td>
         <td><a href='creditos.html'>Créditos</a></td>
+        <td><a href='api-docs.html'>API Docs</a></td>
       </tr>
     </table>
   </div>`)
