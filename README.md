@@ -21,6 +21,8 @@ Um projeto em parceria com meu pai para gerar e gerenciar jogos de loteria brasi
 docker compose up -d
 ```
 
+O app inicializa o banco automaticamente na primeira vez.
+
 Acesse a interface em `http://localhost:3000/combinar.html`.
 
 ## Executar localmente (sem Docker)

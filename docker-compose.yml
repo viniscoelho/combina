@@ -24,6 +24,7 @@ services:
         condition: service_healthy
     command: ["./combina", "-init-db"]
     restart: "no"
+    profiles: ["init"]
 
   app:
     build: .
@@ -34,8 +35,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      init-db:
-        condition: service_completed_successfully
 
 volumes:
   pgdata:

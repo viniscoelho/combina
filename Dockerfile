@@ -10,4 +10,4 @@ WORKDIR /app
 COPY --from=builder /app/combina .
 COPY web/ web/
 EXPOSE 3000
-CMD ["./combina"]
+CMD ["sh", "-c", "./combina -init-db; ./combina"]
