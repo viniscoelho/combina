@@ -1,16 +1,21 @@
 $(document).ready(function(){
   function getFormData($form){
     var rawForm = $form.serializeArray();
-    var formAsJson = {};
+    var formAsJson = {fixed_numbers: [], most_sorted: []};
 
     $.map(rawForm, function(f, i){
       if (f['name'] == "fixed_numbers" || f['name'] == "most_sorted") {
-        tmp = f['value'].split(",");
-        numbers = []
-        $.each(tmp, function(index, value){
-          numbers.push(Number(value));
-        });
-        formAsJson[f['name']] = numbers
+        var raw = f['value'].trim();
+        if (raw === '') {
+          formAsJson[f['name']] = [];
+        } else {
+          tmp = raw.split(",");
+          numbers = []
+          $.each(tmp, function(index, value){
+            numbers.push(Number(value));
+          });
+          formAsJson[f['name']] = numbers
+        }
       } else if (f['name'] == "num_games" || f['name'] == "num_each") {
         formAsJson[f['name']] = Number(f['value']);
       } else {
