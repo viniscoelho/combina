@@ -18,11 +18,15 @@ func NewGenerateFromHandler(cb types.LottoCombinator) *generateFrom {
 }
 
 type generateFromDTO struct {
-	GameType      *string `json:"game_type"`
-	NumGames      *int    `json:"num_games"`
-	NumEach       *int    `json:"num_each"`
-	ExistingGames [][]int `json:"existing_games"`
-	Alias         *string `json:"alias,omitempty"`
+	GameType          *string `json:"game_type"`
+	NumGames          *int    `json:"num_games"`
+	NumEach           *int    `json:"num_each"`
+	ExistingGames     [][]int `json:"existing_games"`
+	CarryGames        [][]int `json:"carry_games,omitempty"`
+	FixedNumbers      []int   `json:"fixed_numbers,omitempty"`
+	MostSortedNumbers []int   `json:"most_sorted,omitempty"`
+	SaveImported      *bool   `json:"save_imported,omitempty"`
+	Alias             *string `json:"alias,omitempty"`
 }
 
 func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -54,8 +58,8 @@ func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	inputDTO := types.LottoInputDTO{
 		NumGames:          dto.NumGames,
 		NumEachGame:       dto.NumEach,
-		FixedNumbers:      []int{},
-		MostSortedNumbers: []int{},
+		FixedNumbers:      dto.FixedNumbers,
+		MostSortedNumbers: dto.MostSortedNumbers,
 		GameType:          dto.GameType,
 		Alias:             &alias,
 	}
@@ -74,12 +78,31 @@ func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rgg := types.NewRandomGameGenerator(lottoInput, dto.ExistingGames)
+	// Both imported (ExistingGames) and previously generated (CarryGames) games
+	// seed the dedup map so newly generated games never collide with either set.
+	seed := make([][]int, 0, len(dto.ExistingGames)+len(dto.CarryGames))
+	seed = append(seed, dto.ExistingGames...)
+	seed = append(seed, dto.CarryGames...)
+
+	var rgg types.RandomGameGenerator
+	if len(lottoInput.MostSortedNumbers) != 0 {
+		rgg = types.NewMostSortedShuffle(lottoInput, seed)
+	} else {
+		rgg = types.NewRandomGameGenerator(lottoInput, seed)
+	}
 	lotto := rgg.GenerateLottoCombination()
 
-	allGames := append(dto.ExistingGames, lotto.Numbers.Combination...)
-	lotto.Numbers.Combination = allGames
-	lotto.Numbers.Rows = len(allGames)
+	// Persisted set = imported (only if save_imported, default true) + carried
+	// (always) + newly generated. Order: imported, carried, generated.
+	saveImported := dto.SaveImported == nil || *dto.SaveImported
+	saved := make([][]int, 0, len(seed)+len(lotto.Numbers.Combination))
+	if saveImported {
+		saved = append(saved, dto.ExistingGames...)
+	}
+	saved = append(saved, dto.CarryGames...)
+	saved = append(saved, lotto.Numbers.Combination...)
+	lotto.Numbers.Combination = saved
+	lotto.Numbers.Rows = len(saved)
 
 	if err := h.cb.AddCombination(lotto); err != nil {
 		log.Printf("storage error: %s", err)

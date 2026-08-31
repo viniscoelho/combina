@@ -28,7 +28,7 @@
 
       <div id="numGamesRow" class="div-table-row">
         <div class="div-table-col-a">
-          <strong>Digite a quantidade de jogos:</strong>
+          <strong>Quantidade de jogos:</strong>
         </div>
         <div class="div-table-col-b">
           <input name="num_games" type="number" class="form-control input-width at-right" maxlength="7" size="7"
@@ -38,7 +38,7 @@
 
       <div id="numEachRow" class="div-table-row">
         <div class="div-table-col-a">
-          <strong>Quantos números cada jogo terá?:</strong>
+          <strong>Números por jogo:</strong>
         </div>
         <div class="div-table-col-b">
           <select name="num_each" id="numEach" class="form-control input-width at-right" required>
@@ -48,25 +48,27 @@
 
       <div id="fixedNumbersRow" class="div-table-row">
         <div class="div-table-col-a">
-          <strong>Digite os números fixos (separados por vírgula):</strong>
+          <strong>Números fixos (opcional):</strong>
+          <span style="font-size:13px; color:#666;">(presentes em todo jogo gerado)</span>
         </div>
         <div class="div-table-col-b">
-          <input name="fixed_numbers" class="form-control input-width at-right" maxlength="30" size="30" />
+          <input name="fixed_numbers" placeholder="ex: 3, 7, 12" class="form-control input-width at-right" maxlength="30" size="30" />
         </div>
       </div>
 
       <div id="mostSortedRow" class="div-table-row">
         <div class="div-table-col-a">
-          <strong>Digite os números mais sorteados (separados por vírgula):</strong>
+          <strong>Números mais sorteados (opcional):</strong>
+          <span style="font-size:13px; color:#666;">(aparecem com mais frequência)</span>
         </div>
         <div class="div-table-col-b">
-          <input name="most_sorted" class="form-control input-width at-right" maxlength="50" size="50" />
+          <input name="most_sorted" placeholder="ex: 5, 9, 21" class="form-control input-width at-right" maxlength="50" size="50" />
         </div>
       </div>
 
       <div id="aliasRow" class="div-table-row">
         <div class="div-table-col-a">
-          <strong>Dê um nome a este jogo (opcional)*:</strong>
+          <strong>Nome do conjunto (opcional):</strong>
         </div>
         <div class="div-table-col-b">
           <input name="alias" class="form-control input-width at-right" maxlength="50" size="50" />

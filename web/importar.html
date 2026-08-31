@@ -80,10 +80,49 @@
 
     <div class="div-table-row">
       <div class="div-table-col-a">
+        <strong>Números fixos (opcional):</strong>
+        <span style="font-size:13px; color:#666;">(presentes em todo jogo gerado)</span>
+      </div>
+      <div class="div-table-col-b">
+        <input id="fixedNumbers" type="text" placeholder="ex: 3, 7, 12" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Números mais sorteados (opcional):</strong>
+        <span style="font-size:13px; color:#666;">(aparecem com mais frequência)</span>
+      </div>
+      <div class="div-table-col-b">
+        <input id="mostSorted" type="text" placeholder="ex: 5, 9, 21" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row">
+      <div class="div-table-col-a">
         <strong>Nome do conjunto (opcional):</strong>
       </div>
       <div class="div-table-col-b">
         <input id="alias" type="text" maxlength="50" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Salvar jogos importados junto:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <input id="saveImported" type="checkbox" class="at-right" checked />
+      </div>
+    </div>
+
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Acrescentar aos jogos já gerados:</strong>
+        <span style="font-size:13px; color:#666;">(usa os atuais como base)</span>
+      </div>
+      <div class="div-table-col-b">
+        <input id="appendMode" type="checkbox" class="at-right" />
       </div>
     </div>
 
@@ -106,6 +145,7 @@
 
   <script type="text/javascript">
     var loadedGames = [];
+    var generatedGames = [];
     var loadedGameType = '';
 
     var gameHints = {
@@ -156,6 +196,7 @@
         contentType: false,
         success: function (data) {
           loadedGames = data.games || [];
+          generatedGames = [];
           loadedGameType = data.game_type;
           var msg = loadedGames.length + ' jogo(s) válido(s) carregado(s).';
           if (data.discarded > 0) msg += ' ' + data.discarded + ' linha(s) descartada(s).';
@@ -173,10 +214,23 @@
       });
     });
 
+    function parseNumberList(raw) {
+      if (!raw) return [];
+      return raw.split(/[\s,;]+/)
+        .map(function (s) { return s.trim(); })
+        .filter(function (s) { return s !== ''; })
+        .map(function (s) { return parseInt(s, 10); })
+        .filter(function (n) { return !isNaN(n); });
+    }
+
     document.getElementById('btnGenerate').addEventListener('click', function () {
       var numGames = parseInt(document.getElementById('numGames').value);
       var numEach  = parseInt(document.getElementById('numEach').value);
       var alias    = document.getElementById('alias').value.trim() || 'default';
+      var saveImported = document.getElementById('saveImported').checked;
+      var appendMode   = document.getElementById('appendMode').checked;
+      var fixedNumbers = parseNumberList(document.getElementById('fixedNumbers').value);
+      var mostSorted   = parseNumberList(document.getElementById('mostSorted').value);
 
       if (!numGames || numGames < 1) {
         document.getElementById('generateFeedback').innerText = 'Informe a quantidade de jogos.';
@@ -189,11 +243,21 @@
 
       document.getElementById('generateFeedback').innerText = 'Gerando...';
 
+      // In append mode the previously generated games are carried: they seed
+      // dedup and are always re-saved into the new game, and the freshly
+      // generated ones are appended to them. Imported games seed dedup and are
+      // saved only when save_imported is on.
+      var carry = appendMode ? generatedGames : [];
+
       var body = JSON.stringify({
         game_type:      loadedGameType,
         num_games:      numGames,
         num_each:       numEach,
         existing_games: loadedGames,
+        carry_games:    carry,
+        fixed_numbers:  fixedNumbers,
+        most_sorted:    mostSorted,
+        save_imported:  saveImported,
         alias:          alias
       });
 
@@ -208,9 +272,20 @@
         dataType: 'json',
         success: function (data) {
           var all = (data && data.numbers && data.numbers.combination) ? data.numbers.combination : [];
-          var generated = all.slice(loadedGames.length);
-          document.getElementById('generateFeedback').innerText = generated.length + ' jogo(s) gerado(s) e salvo(s) junto com ' + loadedGames.length + ' jogo(s) importado(s).';
-          renderGamesTable(loadedGames, generated);
+          // Saved order is [imported?][carry][fresh]; the fresh games are the
+          // last numGames entries regardless of the other toggles.
+          var fresh = all.slice(all.length - numGames);
+
+          generatedGames = carry.concat(fresh);
+
+          var msg = fresh.length + ' jogo(s) gerado(s) e salvo(s).';
+          if (saveImported) {
+            msg += ' Jogo salvo com ' + loadedGames.length + ' importado(s) + ' + generatedGames.length + ' gerado(s).';
+          } else {
+            msg += ' ' + loadedGames.length + ' jogo(s) importado(s) NÃO foram salvos.';
+          }
+          document.getElementById('generateFeedback').innerText = msg;
+          renderGamesTable(loadedGames, generatedGames);
         },
         error: function (xhr) {
           document.getElementById('generateFeedback').innerText = friendlyError(xhr, 'Erro ao gerar jogos.');
