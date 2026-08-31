@@ -77,6 +77,10 @@ func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rgg := types.NewRandomGameGenerator(lottoInput, dto.ExistingGames)
 	lotto := rgg.GenerateLottoCombination()
 
+	allGames := append(dto.ExistingGames, lotto.Numbers.Combination...)
+	lotto.Numbers.Combination = allGames
+	lotto.Numbers.Rows = len(allGames)
+
 	if err := h.cb.AddCombination(lotto); err != nil {
 		log.Printf("storage error: %s", err)
 		switch err.(type) {

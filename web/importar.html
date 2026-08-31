@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div class="div-table-row" style="margin-top:10px;">
+    <div class="div-table-row">
       <div class="div-table-col-a">
         <strong>Arquivo de jogos (um por linha):</strong>
       </div>
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div class="div-table-row" style="margin-top:10px;">
+    <div class="div-table-row">
       <div class="div-table-col-a">
         <strong>Separador dos números na linha:</strong>
       </div>
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <div class="buttons" style="margin-top:10px;">
+    <div class="buttons">
       <button id="btnImport" type="button" class="btn btn-primary">Carregar jogos</button>
     </div>
 
@@ -68,7 +68,7 @@
       </div>
     </div>
 
-    <div class="div-table-row" style="margin-top:6px;">
+    <div class="div-table-row">
       <div class="div-table-col-a">
         <strong>Números por jogo:</strong>
         <span id="numEachHint" style="font-size:13px; color:#666;"></span>
@@ -78,7 +78,7 @@
       </div>
     </div>
 
-    <div class="div-table-row" style="margin-top:6px;">
+    <div class="div-table-row">
       <div class="div-table-col-a">
         <strong>Nome do conjunto (opcional):</strong>
       </div>
@@ -87,7 +87,7 @@
       </div>
     </div>
 
-    <div class="buttons" style="margin-top:10px;">
+    <div class="buttons">
       <button id="btnGenerate" type="button" class="btn btn-success">Gerar jogos</button>
     </div>
 
@@ -207,8 +207,9 @@
         data: body,
         dataType: 'json',
         success: function (data) {
-          var generated = (data && data.numbers && data.numbers.combination) ? data.numbers.combination : [];
-          document.getElementById('generateFeedback').innerText = generated.length + ' jogo(s) gerado(s) e salvo(s).';
+          var all = (data && data.numbers && data.numbers.combination) ? data.numbers.combination : [];
+          var generated = all.slice(loadedGames.length);
+          document.getElementById('generateFeedback').innerText = generated.length + ' jogo(s) gerado(s) e salvo(s) junto com ' + loadedGames.length + ' jogo(s) importado(s).';
           renderGamesTable(loadedGames, generated);
         },
         error: function (xhr) {

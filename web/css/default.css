@@ -240,15 +240,18 @@ div#textLeft h3, div#textRight h3 {
 }
 
 .div-table-row {
-  display: table-row;
+  display: block;
   width: auto;
   clear: both;
+  margin-bottom: 12px;
 }
 
 .div-table-col-a {
   float: left;
   display: table-column;
   width: 550px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .div-table-col-b {
@@ -268,23 +271,6 @@ div#textLeft h3, div#textRight h3 {
   padding-top: 30px;
   display: table-column;
   width: 700px;
-}
-
-.div-table-row {
-  display: table-row;
-  width: auto;
-  clear: both;
-}
-
-.div-table-col-b {
-  float: left;
-  display: table-column;
-  width: 150px;
-}
-
-.div-table-col-c {
-  float: left;
-  width: 600px;
 }
 
 .div-table-col-footer {
