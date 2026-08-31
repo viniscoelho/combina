@@ -118,6 +118,16 @@
       'Seninha':      '14 a 20, 25 ou 30'
     };
 
+    var gameMinEach = {
+      'Lotofacil':    15,
+      'Mega-Sena':    6,
+      'Quina':        5,
+      'Lotomania':    50,
+      'Quina-Brasil': 13,
+      'Quininha':     15,
+      'Seninha':      14
+    };
+
     document.getElementById('btnImport').addEventListener('click', function () {
       var gameType = document.getElementById('gameType').value;
       var fileInput = document.getElementById('gameFile');
@@ -152,6 +162,8 @@
           document.getElementById('importFeedback').innerText = msg;
 
           document.getElementById('numEachHint').innerText = ' (válido: ' + (gameHints[loadedGameType] || '') + ')';
+          document.getElementById('numGames').value = 1;
+          document.getElementById('numEach').value = gameMinEach[loadedGameType] || 1;
           document.getElementById('generateSection').style.display = '';
           renderGamesTable(loadedGames, []);
         },
