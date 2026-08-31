@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+
+<script type="text/javascript" src="common/header.js"></script>
+
+<body>
+  <script type="text/javascript" src="common/menu.js"></script>
+
+  <!-- Step 1: load saved combinations -->
+  <div class="centered">
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Filtrar por tipo de jogo:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="gameType" class="form-control input-width at-right">
+          <option value="">Todos</option>
+          <option value="Lotofacil">Lotofácil</option>
+          <option value="Mega-Sena">Mega-Sena</option>
+          <option value="Quina">Quina</option>
+          <option value="Lotomania">Lotomania</option>
+          <option value="Quina-Brasil">Quina Brasil</option>
+          <option value="Quininha">Quininha</option>
+          <option value="Seninha">Seninha</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="buttons" style="margin-top:10px;">
+      <button id="btnLoad" type="button" class="btn btn-primary">Carregar conjuntos</button>
+    </div>
+    <div id="loadFeedback" style="margin-top:8px; color:#555;"></div>
+  </div>
+
+  <!-- Step 2: pick a combination and enter drawn numbers -->
+  <div id="conferirSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Selecione o conjunto a conferir:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="comboSelect" class="form-control at-right" style="width:250px;"></select>
+      </div>
+    </div>
+
+    <div class="div-table-row" style="margin-top:10px;">
+      <div class="div-table-col-a">
+        <strong>Números sorteados (separados por vírgula):</strong>
+      </div>
+      <div class="div-table-col-b">
+        <input id="drawnNumbers" type="text" class="form-control input-width at-right"
+               placeholder="ex: 1,5,12,23,45" style="width:220px;" />
+      </div>
+    </div>
+
+    <div class="buttons" style="margin-top:10px;">
+      <button id="btnConferir" type="button" class="btn btn-success">Conferir</button>
+    </div>
+    <div id="conferirFeedback" style="margin-top:8px; color:#555;"></div>
+  </div>
+
+  <!-- Step 3: results -->
+  <div id="resultSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <h3 style="margin-bottom:10px;">Resultado</h3>
+    <table class="table" style="border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="padding:4px 12px;">Acertos</th>
+          <th style="padding:4px 12px;">Quantidade de jogos</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+    <p id="noWins" style="display:none; color:#888; margin-top:8px;">Nenhum jogo premiado neste resultado.</p>
+  </div>
+
+  <script type="text/javascript">
+    var combos = [];
+
+    document.getElementById('btnLoad').addEventListener('click', function () {
+      var gameType = document.getElementById('gameType').value;
+      var url = 'http://localhost:3000/combinations';
+      if (gameType) url += '?type=' + encodeURIComponent(gameType);
+
+      document.getElementById('loadFeedback').innerText = 'Carregando...';
+
+      $.ajax({
+        beforeSend: function (req) { req.setRequestHeader('Accept', 'application/json'); },
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          if (!data || data.length === 0) {
+            document.getElementById('loadFeedback').innerText = 'Nenhum conjunto encontrado.';
+            document.getElementById('conferirSection').style.display = 'none';
+            return;
+          }
+          combos = data;
+          document.getElementById('loadFeedback').innerText = data.length + ' conjunto(s) carregado(s).';
+          var sel = document.getElementById('comboSelect');
+          sel.innerHTML = '';
+          data.forEach(function (item) {
+            var label = (item.alias || item.id) + ' — ' + item.game_type +
+                        ' (' + (item.numbers && item.numbers.rows ? item.numbers.rows : '?') + ' jogos)';
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = label;
+            sel.appendChild(opt);
+          });
+          document.getElementById('conferirSection').style.display = '';
+          document.getElementById('resultSection').style.display = 'none';
+        },
+        error: function (xhr) {
+          document.getElementById('loadFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+        }
+      });
+    });
+
+    document.getElementById('btnConferir').addEventListener('click', function () {
+      var id = document.getElementById('comboSelect').value;
+      var raw = document.getElementById('drawnNumbers').value.trim();
+
+      if (!raw) {
+        document.getElementById('conferirFeedback').innerText = 'Informe os números sorteados.';
+        return;
+      }
+
+      var parts = raw.split(',');
+      var values = [];
+      for (var i = 0; i < parts.length; i++) {
+        var n = parseInt(parts[i].trim());
+        if (isNaN(n)) {
+          document.getElementById('conferirFeedback').innerText = 'Número inválido: "' + parts[i].trim() + '"';
+          return;
+        }
+        values.push(n);
+      }
+
+      document.getElementById('conferirFeedback').innerText = 'Conferindo...';
+
+      $.ajax({
+        beforeSend: function (req) { req.setRequestHeader('Accept', 'application/json'); },
+        url: 'http://localhost:3000/combinations/evaluate/' + encodeURIComponent(id) +
+             '?values=' + encodeURIComponent(JSON.stringify(values)),
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          document.getElementById('conferirFeedback').innerText = '';
+          renderResult(data);
+        },
+        error: function (xhr) {
+          document.getElementById('conferirFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+        }
+      });
+    });
+
+    function renderResult(data) {
+      var body = document.getElementById('resultBody');
+      body.innerHTML = '';
+
+      var keys = Object.keys(data).map(Number).sort(function (a, b) { return b - a; });
+
+      if (keys.length === 0) {
+        document.getElementById('noWins').style.display = '';
+        document.getElementById('resultSection').style.display = '';
+        return;
+      }
+
+      document.getElementById('noWins').style.display = 'none';
+      keys.forEach(function (hits) {
+        var row = document.createElement('tr');
+        row.innerHTML =
+          '<td style="padding:4px 12px; font-weight:bold;">' + hits + '</td>' +
+          '<td style="padding:4px 12px;">' + data[hits] + '</td>';
+        body.appendChild(row);
+      });
+      document.getElementById('resultSection').style.display = '';
+    }
+  </script>
+
+  <script type="text/javascript" src="common/footer.js"></script>
+</body>
+
+</html>

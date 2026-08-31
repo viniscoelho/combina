@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+
+<script type="text/javascript" src="common/header.js"></script>
+
+<body>
+  <script type="text/javascript" src="common/menu.js"></script>
+
+  <div class="centered">
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Filtrar por tipo de jogo:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="gameType" class="form-control input-width at-right">
+          <option value="">Todos</option>
+          <option value="Lotofacil">Lotofácil</option>
+          <option value="Mega-Sena">Mega-Sena</option>
+          <option value="Quina">Quina</option>
+          <option value="Lotomania">Lotomania</option>
+          <option value="Quina-Brasil">Quina Brasil</option>
+          <option value="Quininha">Quininha</option>
+          <option value="Seninha">Seninha</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="buttons" style="margin-top:10px;">
+      <button id="btnList" type="button" class="btn btn-primary">Listar</button>
+    </div>
+
+    <div id="feedback" style="margin-top:8px; color:#555;"></div>
+  </div>
+
+  <div id="resultsSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <table class="table" style="border-collapse:collapse; min-width:700px;">
+      <thead>
+        <tr>
+          <th style="padding:4px 10px;">#</th>
+          <th style="padding:4px 10px;">Nome</th>
+          <th style="padding:4px 10px;">Tipo</th>
+          <th style="padding:4px 10px;">Jogos</th>
+          <th style="padding:4px 10px;">Data</th>
+          <th style="padding:4px 10px;"></th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+
+  <script type="text/javascript">
+    document.getElementById('btnList').addEventListener('click', loadList);
+
+    function loadList() {
+      var gameType = document.getElementById('gameType').value;
+      var url = 'http://localhost:3000/combinations';
+      if (gameType) url += '?type=' + encodeURIComponent(gameType);
+
+      document.getElementById('feedback').innerText = 'Carregando...';
+
+      $.ajax({
+        beforeSend: function (req) {
+          req.setRequestHeader('Accept', 'application/json');
+        },
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          if (!data || data.length === 0) {
+            document.getElementById('feedback').innerText = 'Nenhum jogo encontrado.';
+            document.getElementById('resultsSection').style.display = 'none';
+            return;
+          }
+          document.getElementById('feedback').innerText = data.length + ' conjunto(s) encontrado(s).';
+          renderTable(data);
+        },
+        error: function (xhr) {
+          document.getElementById('feedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+        }
+      });
+    }
+
+    function renderTable(items) {
+      var body = document.getElementById('resultsBody');
+      body.innerHTML = '';
+      items.forEach(function (item, idx) {
+        var date = item.created_on ? new Date(item.created_on).toLocaleString('pt-BR') : '-';
+        var numGames = item.numbers && item.numbers.rows ? item.numbers.rows : '-';
+        var row = document.createElement('tr');
+        row.innerHTML =
+          '<td style="padding:3px 10px;">' + (idx + 1) + '</td>' +
+          '<td style="padding:3px 10px;">' + (item.alias || '-') + '</td>' +
+          '<td style="padding:3px 10px;">' + item.game_type + '</td>' +
+          '<td style="padding:3px 10px;">' + numGames + '</td>' +
+          '<td style="padding:3px 10px;">' + date + '</td>' +
+          '<td style="padding:3px 10px;">' +
+            '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'' + item.id + '\', this)">Excluir</button>' +
+          '</td>';
+        body.appendChild(row);
+      });
+      document.getElementById('resultsSection').style.display = '';
+    }
+
+    function deleteItem(id, btn) {
+      if (!confirm('Excluir este conjunto?')) return;
+      $.ajax({
+        url: 'http://localhost:3000/combinations/' + encodeURIComponent(id),
+        type: 'DELETE',
+        success: function () {
+          var row = btn.closest('tr');
+          row.parentNode.removeChild(row);
+        },
+        error: function (xhr) {
+          alert('Erro ao excluir: ' + (xhr.responseText || xhr.status));
+        }
+      });
+    }
+  </script>
+
+  <script type="text/javascript" src="common/footer.js"></script>
+</body>
+
+</html>

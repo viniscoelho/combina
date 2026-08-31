@@ -5,11 +5,11 @@ document.write(`
     </div>
     <table class='menu centered'>
       <tr>
-        <td><a href='combina.html'>Gerar jogos</a></td>
+        <td><a href='combinar.html'>Gerar jogos</a></td>
         <td><a href='importar.html'>Importar jogos</a></td>
-        <td><a href='combina.html'>Listar jogos</a></td>
-        <td><a href='combina.html'>Conferir jogos</a></td>
-        <td><a href='combina.html'>Créditos</a></td>
+        <td><a href='listar.html'>Listar jogos</a></td>
+        <td><a href='conferir.html'>Conferir jogos</a></td>
+        <td><a href='creditos.html'>Créditos</a></td>
       </tr>
     </table>
   </div>`)
