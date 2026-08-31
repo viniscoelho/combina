@@ -18,12 +18,7 @@ Um projeto em parceria com meu pai para gerar e gerenciar jogos de loteria brasi
 ## Executar com Docker (recomendado)
 
 ```bash
-# Primeira vez: inicializa o banco de dados
-docker compose up -d postgres
-docker compose run --rm app ./combina -init-db
-
-# Nas demais vezes: sobe tudo com um comando
-docker compose up
+docker compose up -d
 ```
 
 Acesse a interface em `http://localhost:3000/combinar.html`.

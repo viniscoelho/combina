@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"combina/src/types"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -54,6 +55,10 @@ func createDatabase(conn *pgxpool.Pool) error {
 
 	_, err := conn.Exec(context.Background(), `CREATE DATABASE lotto`)
 	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			log.Printf("Database already exists, skipping.")
+			return nil
+		}
 		return err
 	}
 
@@ -64,7 +69,7 @@ func createDatabase(conn *pgxpool.Pool) error {
 func createTable(conn *pgxpool.Pool) error {
 	defer conn.Close()
 
-	table := `CREATE TABLE lotto(
+	table := `CREATE TABLE IF NOT EXISTS lotto(
 		id VARCHAR (50) PRIMARY KEY,
 		type VARCHAR (50) NOT NULL,
 		combination JSON NOT NULL,
@@ -76,6 +81,6 @@ func createTable(conn *pgxpool.Pool) error {
 		return err
 	}
 
-	log.Printf("Table created!")
+	log.Printf("Table ready!")
 	return nil
 }
