@@ -40,5 +40,7 @@ func CreateRoutes(cb types.LottoCombinator) *mux.Router {
 		Name("EvaluateCombination").
 		Handler(routes.NewEvaluateComboHandler(cb))
 
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web")))
+
 	return r
 }

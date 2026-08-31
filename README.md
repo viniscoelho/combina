@@ -12,39 +12,43 @@ Um projeto em parceria com meu pai para gerar e gerenciar jogos de loteria brasi
 
 ## Pré-requisitos
 
-- Go 1.24+
-- PostgreSQL rodando em `localhost:5432`
+- Docker e Docker Compose (recomendado), **ou**
+- Go 1.24+ e PostgreSQL rodando em `localhost:5432`
 
-## Configuração inicial
+## Executar com Docker (recomendado)
 
-1. Clone o repositório:
+```bash
+# Primeira vez: inicializa o banco de dados
+docker compose up -d postgres
+docker compose run --rm app ./combina -init-db
+
+# Nas demais vezes: sobe tudo com um comando
+docker compose up
+```
+
+Acesse a interface em `http://localhost:3000/combinar.html`.
+
+## Executar localmente (sem Docker)
+
+1. Clone o repositório e entre na pasta:
    ```bash
    git clone <url-do-repositório>
    cd combina
    ```
 
-2. Crie o banco de dados e a tabela (executar apenas na primeira vez):
+2. Crie o banco de dados (apenas na primeira vez):
    ```bash
    go run src/main.go -init-db
    ```
-   Isso cria o banco `lotto` e a tabela `lotto` no PostgreSQL local.
 
 3. Inicie o servidor:
    ```bash
    go run src/main.go
    ```
-   O servidor sobe na porta `3000`.
 
-## Interface web
+O servidor sobe na porta `3000`. A interface estará em `http://localhost:3000/combinar.html`.
 
-Abra os arquivos HTML diretamente no navegador (não é necessário servidor web):
 
-| Arquivo | Função |
-|---|---|
-| `combina.html` | Gera jogos via formulário (tipo, quantidade, números fixos e mais sorteados) |
-| `importar.html` | Importa um arquivo de jogos e gera combinações adicionais a partir dele |
-
-## API REST
 
 Base URL: `http://localhost:3000`
 

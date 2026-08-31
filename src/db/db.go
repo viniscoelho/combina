@@ -10,19 +10,17 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-/*
-	DATABASE_URL:               postgres://{user}:{password}@{hostname}:{port}/{database-name}
-*/
+const defaultConnectionURL = "postgres://localhost:5432"
 
-const connectionURL = "postgres://localhost:5432"
+func connectionURL() string {
+	if url := os.Getenv("DATABASE_URL"); url != "" {
+		return url
+	}
+	return defaultConnectionURL
+}
 
 func DatabaseConnect(dbName string) (*pgxpool.Pool, error) {
-	err := os.Setenv("DATABASE_URL", fmt.Sprintf("%s%s", connectionURL, dbName))
-	if err != nil {
-		return nil, fmt.Errorf("failed to set DATABASE_URL: %w", err)
-	}
-
-	conn, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	conn, err := pgxpool.Connect(context.Background(), connectionURL()+dbName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
