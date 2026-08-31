@@ -67,7 +67,7 @@ func TestRGG_GenerateCombination_AllDistinct(t *testing.T) {
 	}
 }
 
-// ---- fisherYatesModified.GenerateCombination ----
+// ---- mostSortedGenerator.GenerateCombination ----
 
 func TestFY_GenerateCombination_CorrectLength(t *testing.T) {
 	r := require.New(t)
@@ -76,7 +76,7 @@ func TestFY_GenerateCombination_CorrectLength(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 	combo := fy.GenerateCombination()
 	r.NotNil(combo)
 
@@ -91,7 +91,7 @@ func TestFY_GenerateCombination_ReturnsNilWhenPoolTooSmall(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 
 	// need = 13 - 4 = 9; shrink both pools so their combined size < 9
 	fy.mostSortedNumbers = []int{1, 2, 3}
@@ -109,7 +109,7 @@ func TestFY_GenerateCombination_AllDistinct(t *testing.T) {
 	r.NoError(err)
 
 	for i := 0; i < 500; i++ {
-		fy := NewMostSortedShuffle(input, nil)
+		fy := NewMostSortedGenerator(input, nil)
 		combo := fy.GenerateCombination()
 		r.NotNil(combo)
 
@@ -131,7 +131,7 @@ func TestFY_GenerateCombination_OnlyMostSortedWhenRemainingEmpty(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 	fy.remainingNumbers = []int{}
 
 	msSet := make(map[int]bool, len(mostSorted))
@@ -140,7 +140,7 @@ func TestFY_GenerateCombination_OnlyMostSortedWhenRemainingEmpty(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		fy2 := NewMostSortedShuffle(input, nil)
+		fy2 := NewMostSortedGenerator(input, nil)
 		fy2.remainingNumbers = []int{}
 		combo := fy2.GenerateCombination()
 		r.NotNil(combo)
@@ -159,14 +159,14 @@ func TestFY_GenerateCombination_OnlyRemainingWhenMostSortedEmpty(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 	remainSet := make(map[int]bool, len(fy.remainingNumbers))
 	for _, n := range fy.remainingNumbers {
 		remainSet[n] = true
 	}
 
 	for i := 0; i < 100; i++ {
-		fy2 := NewMostSortedShuffle(input, nil)
+		fy2 := NewMostSortedGenerator(input, nil)
 		combo := fy2.GenerateCombination()
 		r.NotNil(combo)
 		for _, n := range combo {
@@ -175,7 +175,7 @@ func TestFY_GenerateCombination_OnlyRemainingWhenMostSortedEmpty(t *testing.T) {
 	}
 }
 
-// ---- fisherYatesModified.isValidGame ----
+// ---- mostSortedGenerator.isValidGame ----
 
 func TestFY_IsValidGame_ReturnsTrueWhenAllRepeatedPositive(t *testing.T) {
 	r := require.New(t)
@@ -184,7 +184,7 @@ func TestFY_IsValidGame_ReturnsTrueWhenAllRepeatedPositive(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 	// All numbers in repeated have budget > 0 after initialize
 	numbers := []int{2, 4, 6, 8, 10}
 	for _, n := range numbers {
@@ -200,7 +200,7 @@ func TestFY_IsValidGame_ReturnsFalseWhenAnyRepeatedZeroOrNegative(t *testing.T) 
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 	numbers := []int{2, 4, 6, 8, 10}
 	for _, n := range numbers {
 		fy.repeated[n] = 3
@@ -217,7 +217,7 @@ func TestFY_IsValidGame_ReturnsFalseWhenRepeatedNegative(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedShuffle(input, nil)
+	fy := NewMostSortedGenerator(input, nil)
 	numbers := []int{2, 4, 6}
 	for _, n := range numbers {
 		fy.repeated[n] = 1

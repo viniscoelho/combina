@@ -1,34 +1,8 @@
 package types
 
-import (
-	"math/rand"
-)
-
-func NewLottoInput(dto LottoInputDTO) (LottoInput, error) {
-	if err := validateInputDTO(dto); err != nil {
-		return LottoInput{}, err
-	}
-
-	if dto.Alias == nil {
-		dto.Alias = new(string)
-		*dto.Alias = "default"
-	}
-
-	li := LottoInput{
-		NumGames:          *dto.NumGames,
-		NumEachGame:       *dto.NumEachGame,
-		FixedNumbers:      dto.FixedNumbers,
-		MostSortedNumbers: dto.MostSortedNumbers,
-		GameType:          *dto.GameType,
-		Alias:             *dto.Alias,
-	}
-
-	return li, nil
-}
-
-// IsNumEachWithinRange validates if the amount of picked numbers
+// IsNumEachValid validates if the amount of picked numbers
 // is valid according to the official lottery rules
-func IsNumEachWithinRange(numEachGame int, gameType string) bool {
+func IsNumEachValid(numEachGame int, gameType string) bool {
 	switch gameType {
 	case "Lotofacil":
 		if numEachGame >= 15 && numEachGame <= 18 {
@@ -149,7 +123,7 @@ func validateInputDTO(dto LottoInputDTO) error {
 		return InvalidDTOError{Message: "amount of most sorted numbers cannot be greater than remaining numbers"}
 	}
 
-	if !IsNumEachWithinRange(*dto.NumEachGame, *dto.GameType) {
+	if !IsNumEachValid(*dto.NumEachGame, *dto.GameType) {
 		return InvalidDTOError{Message: "amount of picked numbers should be within a valid range"}
 	}
 
@@ -170,15 +144,4 @@ func validateInputDTO(dto LottoInputDTO) error {
 	}
 
 	return nil
-}
-
-// pickRandomValues randomly chooses a number from an slice.
-// The number is then removed and returned, along with the
-// modified slice.
-func pickRandomValue(cur []int) ([]int, int) {
-	size := len(cur)
-	pos := rand.Intn(size)
-
-	cur[size-1], cur[pos] = cur[pos], cur[size-1]
-	return cur[:size-1], cur[size-1]
 }

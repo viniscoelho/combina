@@ -82,7 +82,7 @@ func (h importCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 			nums = append(nums, n)
 		}
 
-		if !valid || !types.IsNumEachWithinRange(len(nums), gameType) {
+		if !valid || !types.IsNumEachValid(len(nums), gameType) {
 			discarded++
 			continue
 		}

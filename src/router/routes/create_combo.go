@@ -55,9 +55,9 @@ func (h createCombo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var rgg types.RandomGameGenerator
+	var rgg types.GameGenerator
 	if len(lottoInput.MostSortedNumbers) != 0 {
-		rgg = types.NewMostSortedShuffle(lottoInput, nil)
+		rgg = types.NewMostSortedGenerator(lottoInput, nil)
 	} else {
 		rgg = types.NewRandomGameGenerator(lottoInput, nil)
 	}

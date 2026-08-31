@@ -84,9 +84,9 @@ func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	seed = append(seed, dto.ExistingGames...)
 	seed = append(seed, dto.CarryGames...)
 
-	var rgg types.RandomGameGenerator
+	var rgg types.GameGenerator
 	if len(lottoInput.MostSortedNumbers) != 0 {
-		rgg = types.NewMostSortedShuffle(lottoInput, seed)
+		rgg = types.NewMostSortedGenerator(lottoInput, seed)
 	} else {
 		rgg = types.NewRandomGameGenerator(lottoInput, seed)
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type fisherYatesModified struct {
+type mostSortedGenerator struct {
 	// Rejects games that duplicate or are subsets of already-seen games
 	dedup *dedupIndex
 	// A map to count how many times a number has been used
@@ -33,45 +33,45 @@ type fisherYatesModified struct {
 	alias string
 }
 
-// NewMostSortedShuffle creates a generator that biases selection toward a
+// NewMostSortedGenerator creates a generator that biases selection toward a
 // user-supplied set of "most sorted" numbers (numbers statistically drawn more
 // often in past results). The bias is achieved by giving those numbers a higher
 // weighted probability in each pick — see GenerateCombination for details.
 //
 // existing pre-seeds the duplicate-check map so that games already known
 // (e.g. imported from a file) are never re-generated.
-func NewMostSortedShuffle(input LottoInput, existing [][]int) *fisherYatesModified {
-	fy := fisherYatesModified{}
+func NewMostSortedGenerator(input LottoInput, existing [][]int) *mostSortedGenerator {
+	g := mostSortedGenerator{}
 
-	fy.repeated = make(map[int]int)
-	fy.fixedNumbers = make([]int, len(input.FixedNumbers))
-	fy.mostSortedNumbers = make([]int, len(input.MostSortedNumbers))
+	g.repeated = make(map[int]int)
+	g.fixedNumbers = make([]int, len(input.FixedNumbers))
+	g.mostSortedNumbers = make([]int, len(input.MostSortedNumbers))
 
-	copy(fy.fixedNumbers, input.FixedNumbers)
-	copy(fy.mostSortedNumbers, input.MostSortedNumbers)
+	copy(g.fixedNumbers, input.FixedNumbers)
+	copy(g.mostSortedNumbers, input.MostSortedNumbers)
 
-	fy.numGames = input.NumGames
-	fy.numEachGame = input.NumEachGame
-	fy.gameRange = Games[input.GameType]
-	numFixed := len(fy.fixedNumbers)
-	maxRange := fy.gameRange.Max
+	g.numGames = input.NumGames
+	g.numEachGame = input.NumEachGame
+	g.gameRange = Games[input.GameType]
+	numFixed := len(g.fixedNumbers)
+	maxRange := g.gameRange.Max
 
 	// maxUsage is the ceiling of (non-fixed slots needed across all games)
 	// divided by (non-fixed numbers available). See NewRandomGameGenerator for
 	// the same calculation.
-	fy.maxUsage = ((fy.numEachGame-numFixed)*fy.numGames)/(maxRange-numFixed) + 1
-	if ((fy.numEachGame-numFixed)*fy.numGames)%(maxRange-numFixed) != 0 {
-		fy.maxUsage++
+	g.maxUsage = ((g.numEachGame-numFixed)*g.numGames)/(maxRange-numFixed) + 1
+	if ((g.numEachGame-numFixed)*g.numGames)%(maxRange-numFixed) != 0 {
+		g.maxUsage++
 	}
 
-	fy.gameType = input.GameType
-	fy.alias = input.Alias
+	g.gameType = input.GameType
+	g.alias = input.Alias
 
-	fy.initialize()
+	g.initialize()
 
-	fy.dedup = newDedupIndex(existing, fy.numEachGame)
+	g.dedup = newDedupIndex(existing, g.numEachGame)
 
-	return &fy
+	return &g
 }
 
 // initialize (re-)populates repeated and remainingNumbers. Most-sorted numbers
@@ -81,27 +81,27 @@ func NewMostSortedShuffle(input LottoInput, existing [][]int) *fisherYatesModifi
 // are appended unconditionally by GenerateValidGame.
 //
 // Called once at construction and again if the pool is exhausted mid-generation.
-func (fy *fisherYatesModified) initialize() {
+func (g *mostSortedGenerator) initialize() {
 	fixed, mostSorted := make(map[int]bool), make(map[int]bool)
-	for _, num := range fy.fixedNumbers {
+	for _, num := range g.fixedNumbers {
 		fixed[num] = true
 	}
-	for _, num := range fy.mostSortedNumbers {
+	for _, num := range g.mostSortedNumbers {
 		mostSorted[num] = true
 	}
 
-	minRange, maxRange := fy.gameRange.Min, fy.gameRange.Max
-	fy.remainingNumbers = make([]int, 0)
+	minRange, maxRange := g.gameRange.Min, g.gameRange.Max
+	g.remainingNumbers = make([]int, 0)
 
 	for num := minRange; num <= maxRange; num++ {
 		_, isFixed := fixed[num]
 		_, isMostSorted := mostSorted[num]
 
 		if isMostSorted {
-			fy.repeated[num] = int(float64(fy.maxUsage) * 1.75)
+			g.repeated[num] = int(float64(g.maxUsage) * 1.75)
 		} else if !isFixed && !isMostSorted {
-			fy.repeated[num] = fy.maxUsage
-			fy.remainingNumbers = append(fy.remainingNumbers, num)
+			g.repeated[num] = g.maxUsage
+			g.remainingNumbers = append(g.remainingNumbers, num)
 		}
 	}
 }
@@ -123,17 +123,17 @@ func (fy *fisherYatesModified) initialize() {
 //
 // Returns nil if there are not enough numbers in total to fill m positions, or
 // if both pools are empty before m positions are filled.
-func (fy *fisherYatesModified) GenerateCombination() []int {
-	numbersK, numbersNK := make([]int, len(fy.mostSortedNumbers)), make([]int, len(fy.remainingNumbers))
-	copy(numbersK, fy.mostSortedNumbers)
-	copy(numbersNK, fy.remainingNumbers)
+func (g *mostSortedGenerator) GenerateCombination() []int {
+	numbersK, numbersNK := make([]int, len(g.mostSortedNumbers)), make([]int, len(g.remainingNumbers))
+	copy(numbersK, g.mostSortedNumbers)
+	copy(numbersNK, g.remainingNumbers)
 
 	// m: non-fixed slots to fill per game
-	m := fy.numEachGame - len(fy.fixedNumbers)
+	m := g.numEachGame - len(g.fixedNumbers)
 	// n: total non-fixed numbers available (decrements each pick)
-	n := fy.gameRange.Max - len(fy.fixedNumbers)
+	n := g.gameRange.Max - len(g.fixedNumbers)
 	// k: most-sorted numbers not yet picked this game (decrements when one is chosen)
-	k := len(fy.mostSortedNumbers)
+	k := len(g.mostSortedNumbers)
 	// p and q are the relative weights for most-sorted vs remaining pools
 	p, q := 7, 3
 
@@ -165,9 +165,9 @@ func (fy *fisherYatesModified) GenerateCombination() []int {
 // remaining usage budget (repeated > 0). A combination that would exceed the
 // budget of any number is rejected so that no single number dominates the
 // full set of generated games.
-func (fy *fisherYatesModified) isValidGame(numbers []int) bool {
+func (g *mostSortedGenerator) isValidGame(numbers []int) bool {
 	for _, num := range numbers {
-		if c := fy.repeated[num]; c <= 0 {
+		if c := g.repeated[num]; c <= 0 {
 			return false
 		}
 	}
@@ -182,41 +182,41 @@ func (fy *fisherYatesModified) isValidGame(numbers []int) bool {
 // If GenerateCombination returns nil (pool exhausted), initialize() resets the
 // usage budgets before retrying, preventing an infinite loop when numGames is
 // close to the combinatorial maximum.
-func (fy *fisherYatesModified) GenerateValidGame() []int {
-	fixed := make(map[int]bool, len(fy.fixedNumbers))
-	for _, num := range fy.fixedNumbers {
+func (g *mostSortedGenerator) GenerateValidGame() []int {
+	fixed := make(map[int]bool, len(g.fixedNumbers))
+	for _, num := range g.fixedNumbers {
 		fixed[num] = true
 	}
 
 	var numbers []int
 	for {
-		numbers = fy.GenerateCombination()
-		if numbers == nil || !fy.isValidGame(numbers) {
+		numbers = g.GenerateCombination()
+		if numbers == nil || !g.isValidGame(numbers) {
 			if numbers == nil {
 				// pool exhausted — reset usage counters and retry
-				fy.initialize()
+				g.initialize()
 			}
 			continue
 		}
 
 		// add the fixed numbers to the result
-		for _, num := range fy.fixedNumbers {
+		for _, num := range g.fixedNumbers {
 			numbers = append(numbers, num)
 		}
 		sort.Slice(numbers, func(i, j int) bool {
 			return numbers[i] < numbers[j]
 		})
 
-		if fy.dedup.isDuplicate(numbers) {
+		if g.dedup.isDuplicate(numbers) {
 			continue
 		}
-		fy.dedup.record(numbers)
+		g.dedup.record(numbers)
 
 		// Decrement usage counters only for non-fixed numbers; fixed numbers
 		// are not tracked in repeated and must not be touched.
 		for _, num := range numbers {
 			if !fixed[num] {
-				fy.repeated[num]--
+				g.repeated[num]--
 			}
 		}
 		break
@@ -227,25 +227,35 @@ func (fy *fisherYatesModified) GenerateValidGame() []int {
 
 // GenerateLottoCombination generates all numGames combinations and packages
 // them into a Lotto value with a new UUID and the current timestamp.
-func (fy *fisherYatesModified) GenerateLottoCombination() Lotto {
+func (g *mostSortedGenerator) GenerateLottoCombination() Lotto {
 	combination := make([][]int, 0)
-	for i := 0; i < fy.numGames; i++ {
-		numbers := fy.GenerateValidGame()
+	for i := 0; i < g.numGames; i++ {
+		numbers := g.GenerateValidGame()
 		combination = append(combination, numbers)
 	}
 
 	id := uuid.New()
 	gc := GameCombo{
 		Combination: combination,
-		Rows:        fy.numGames,
-		Columns:     fy.numEachGame,
+		Rows:        g.numGames,
+		Columns:     g.numEachGame,
 	}
 
 	return Lotto{
 		ID:        id.String(),
 		Numbers:   gc,
-		GameType:  fy.gameType,
+		GameType:  g.gameType,
 		CreatedOn: time.Now(),
-		Alias:     fy.alias,
+		Alias:     g.alias,
 	}
+}
+
+// pickRandomValue randomly chooses a number from a slice. The number is then
+// removed and returned, along with the modified slice.
+func pickRandomValue(cur []int) ([]int, int) {
+	size := len(cur)
+	pos := rand.Intn(size)
+
+	cur[size-1], cur[pos] = cur[pos], cur[size-1]
+	return cur[:size-1], cur[size-1]
 }

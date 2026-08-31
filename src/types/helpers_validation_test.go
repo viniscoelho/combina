@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIsNumEachWithinRange(t *testing.T) {
+func TestIsNumEachValid(t *testing.T) {
 	cases := []struct {
 		name     string
 		num      int
@@ -64,7 +64,7 @@ func TestIsNumEachWithinRange(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, tc.want, IsNumEachWithinRange(tc.num, tc.gameType))
+			require.Equal(t, tc.want, IsNumEachValid(tc.num, tc.gameType))
 		})
 	}
 }
