@@ -91,8 +91,9 @@ func isValidNumGames(numGames int64, maxRange, numEachGame, numFixed int) bool {
 	nCr := int64(1)
 	for i := 1; i <= r; i++ {
 		nCr = nCr * int64(n-r+i) / int64(i)
-		if nCr < numGames {
-			// already exceeded; short-circuit — no overflow risk since we stop early
+		if nCr >= numGames {
+			// partial product already at least as large as numGames;
+			// the final C(n,r) can only be larger, so the request is valid.
 			return true
 		}
 	}
