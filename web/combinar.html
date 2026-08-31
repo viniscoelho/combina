@@ -41,8 +41,8 @@
           <strong>Quantos números cada jogo terá?:</strong>
         </div>
         <div class="div-table-col-b">
-          <input name="num_each" type="number" class="form-control input-width at-right" maxlength="3" size="3"
-            value="1" required />
+          <select name="num_each" id="numEach" class="form-control input-width at-right" required>
+          </select>
         </div>
       </div>
 
@@ -79,6 +79,34 @@
       </div>
     </div>
   </form>
+
+  <script type="text/javascript">
+    var numEachOptions = {
+      'Lotofacil':    [15, 16, 17, 18],
+      'Mega-Sena':    [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      'Quina':        [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      'Lotomania':    [50],
+      'Quina-Brasil': [13],
+      'Quininha':     [15, 16, 17, 18, 19, 20, 25, 30],
+      'Seninha':      [14, 15, 16, 17, 18, 19, 20, 25, 30]
+    };
+
+    function updateNumEach(gameType) {
+      var sel = document.getElementById('numEach');
+      sel.innerHTML = '';
+      var options = numEachOptions[gameType] || [];
+      options.forEach(function(v) {
+        var opt = document.createElement('option');
+        opt.value = v;
+        opt.innerText = v;
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('gameType').addEventListener('change', function() {
+      updateNumEach(this.value);
+    });
+  </script>
 
   <script type="text/javascript" src="common/footer.js"></script>
 </body>
