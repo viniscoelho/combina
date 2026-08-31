@@ -113,7 +113,7 @@
           document.getElementById('resultSection').style.display = 'none';
         },
         error: function (xhr) {
-          document.getElementById('loadFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+          document.getElementById('loadFeedback').innerText = friendlyError(xhr, 'Erro ao carregar jogos.');
         }
       });
     });
@@ -151,7 +151,7 @@
           renderResult(data);
         },
         error: function (xhr) {
-          document.getElementById('conferirFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+          document.getElementById('conferirFeedback').innerText = friendlyError(xhr, 'Erro ao conferir.');
         }
       });
     });
@@ -180,6 +180,7 @@
     }
   </script>
 
+  <script type="text/javascript" src="common/errors.js"></script>
   <script type="text/javascript" src="common/footer.js"></script>
 </body>
 

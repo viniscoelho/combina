@@ -155,10 +155,9 @@ func (lb lottoBacked) EvaluateCombination(id string, result []int) (map[int]int,
 	}
 
 	scores := make(map[int]int)
-	for i := 0; i < l.Numbers.Rows; i++ {
+	for _, game := range l.Numbers.Combination {
 		var count int
-		for j := 0; j < l.Numbers.Columns; j++ {
-			num := l.Numbers.Combination[i][j]
+		for _, num := range game {
 			if _, ok := lookup[num]; ok {
 				count++
 			}
