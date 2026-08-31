@@ -26,7 +26,8 @@ $(document).ready(function(){
     return JSON.stringify(formAsJson);
   }
 
-  $("#submitCombo").click(function(){
+  $("#submitCombo").click(function(e){
+    e.preventDefault();
     var $form = $("#comboForm");
     var formData = getFormData($form);
 
@@ -38,15 +39,27 @@ $(document).ready(function(){
       url: 'http://localhost:3000/combinations',
       type: 'post',
       data: formData,
-      dataType: 'json',
       success: function(data) {
-        console.log(data);
+        showToast('Jogos gerados e salvos com sucesso!', 'success');
       },
-      error: function(data) {
-        console.log(data);
+      error: function(xhr) {
+        var msg = 'Erro ao gerar jogos.';
+        try { msg = JSON.parse(xhr.responseText).message || xhr.responseText || msg; } catch(e) { if (xhr.responseText) msg = xhr.responseText; }
+        showToast(msg, 'danger');
       }
     });
   });
+
+  function showToast(msg, type) {
+    var existing = document.getElementById('comboToast');
+    if (existing) existing.remove();
+    var div = document.createElement('div');
+    div.id = 'comboToast';
+    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:260px;';
+    div.innerHTML = '<div class="alert alert-' + type + '" style="margin:0;">' + msg + '</div>';
+    document.body.appendChild(div);
+    setTimeout(function() { if (div.parentNode) div.parentNode.removeChild(div); }, 8000);
+  }
 });
 
 //quantities
