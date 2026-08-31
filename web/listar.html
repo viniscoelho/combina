@@ -49,6 +49,7 @@
   </div>
 
   <script type="text/javascript">
+    var currentItems = [];
     document.getElementById('btnList').addEventListener('click', loadList);
 
     function loadList() {
@@ -72,7 +73,8 @@
             return;
           }
           document.getElementById('feedback').innerText = data.length + ' conjunto(s) encontrado(s).';
-          renderTable(data);
+          currentItems = data;
+          renderTable(currentItems);
         },
         error: function (xhr) {
           document.getElementById('feedback').innerText = friendlyError(xhr, 'Erro ao carregar lista.');
@@ -96,7 +98,7 @@
           '<td style="padding:3px 10px;">' + date + '</td>' +
           '<td style="padding:3px 10px; white-space:nowrap;">' +
             '<button class="btn btn-default btn-sm" onclick="toggleDetail(\'' + rowId + '\', this)" style="margin-right:4px;">Ver jogos</button>' +
-            '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'' + item.id + '\', this)">Excluir</button>' +
+            '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'' + item.id + '\')">Excluir</button>' +
           '</td>';
         body.appendChild(row);
 
@@ -126,14 +128,21 @@
       }
     }
 
-    function deleteItem(id, btn) {
+    function deleteItem(id) {
       if (!confirm('Excluir este conjunto?')) return;
       $.ajax({
         url: 'http://localhost:3000/combinations/' + encodeURIComponent(id),
         type: 'DELETE',
         success: function () {
-          var row = btn.closest('tr');
-          row.parentNode.removeChild(row);
+          currentItems = currentItems.filter(function (it) { return it.id !== id; });
+          if (currentItems.length === 0) {
+            document.getElementById('resultsBody').innerHTML = '';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('feedback').innerText = 'Nenhum jogo encontrado.';
+            return;
+          }
+          renderTable(currentItems);
+          document.getElementById('feedback').innerText = currentItems.length + ' conjunto(s) encontrado(s).';
         },
         error: function (xhr) {
           alert(friendlyError(xhr, 'Erro ao excluir.'));
