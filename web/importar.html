@@ -168,7 +168,7 @@
           renderGamesTable(loadedGames, []);
         },
         error: function (xhr) {
-          document.getElementById('importFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+          document.getElementById('importFeedback').innerText = friendlyError(xhr, 'Erro ao carregar arquivo.');
         }
       });
     });
@@ -212,7 +212,7 @@
           renderGamesTable(loadedGames, generated);
         },
         error: function (xhr) {
-          document.getElementById('generateFeedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+          document.getElementById('generateFeedback').innerText = friendlyError(xhr, 'Erro ao gerar jogos.');
         }
       });
     });
@@ -269,6 +269,7 @@
     }
   </script>
 
+  <script type="text/javascript" src="common/errors.js"></script>
   <script type="text/javascript" src="common/footer.js"></script>
 </body>
 

@@ -43,9 +43,7 @@ $(document).ready(function(){
         showToast('Jogos gerados e salvos com sucesso!', 'success');
       },
       error: function(xhr) {
-        var msg = 'Erro ao gerar jogos.';
-        try { msg = JSON.parse(xhr.responseText).message || xhr.responseText || msg; } catch(e) { if (xhr.responseText) msg = xhr.responseText; }
-        showToast(msg, 'danger');
+        showToast(friendlyError(xhr, 'Erro ao gerar jogos.'), 'danger');
       }
     });
   });

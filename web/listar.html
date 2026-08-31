@@ -76,7 +76,7 @@
           renderTable(data);
         },
         error: function (xhr) {
-          document.getElementById('feedback').innerText = 'Erro: ' + (xhr.responseText || xhr.status);
+          document.getElementById('feedback').innerText = friendlyError(xhr, 'Erro ao carregar lista.');
         }
       });
     }
@@ -137,12 +137,13 @@
           row.parentNode.removeChild(row);
         },
         error: function (xhr) {
-          alert('Erro ao excluir: ' + (xhr.responseText || xhr.status));
+          alert(friendlyError(xhr, 'Erro ao excluir.'));
         }
       });
     }
   </script>
 
+  <script type="text/javascript" src="common/errors.js"></script>
   <script type="text/javascript" src="common/footer.js"></script>
 </body>
 
