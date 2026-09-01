@@ -29,7 +29,7 @@
     <div class="buttons">
       <button id="btnLoad" type="button" class="btn btn-primary">Carregar jogos</button>
     </div>
-    <div id="loadFeedback" style="margin-top:8px; color:#555;"></div>
+    <div id="loadFeedback" class="feedback-msg"></div>
   </div>
 
   <!-- Step 2: pick a combination and enter drawn numbers -->
@@ -57,7 +57,7 @@
     <div class="buttons">
       <button id="btnConferir" type="button" class="btn btn-success">Conferir</button>
     </div>
-    <div id="conferirFeedback" style="margin-top:8px; color:#555;"></div>
+    <div id="conferirFeedback" class="feedback-msg"></div>
   </div>
 
   <!-- Step 3: results -->
@@ -67,8 +67,8 @@
     <table class="table" style="border-collapse:collapse;">
       <thead>
         <tr>
-          <th style="padding:4px 12px;">Acertos</th>
-          <th style="padding:4px 12px;">Quantidade de jogos</th>
+          <th>Acertos</th>
+          <th>Quantidade de jogos</th>
         </tr>
       </thead>
       <tbody id="resultBody"></tbody>
@@ -172,8 +172,8 @@
       keys.forEach(function (hits) {
         var row = document.createElement('tr');
         row.innerHTML =
-          '<td style="padding:4px 12px; font-weight:bold;">' + hits + '</td>' +
-          '<td style="padding:4px 12px;">' + data[hits] + '</td>';
+          '<td style="font-weight:bold;">' + hits + '</td>' +
+          '<td>' + data[hits] + '</td>';
         body.appendChild(row);
       });
       document.getElementById('resultSection').style.display = '';

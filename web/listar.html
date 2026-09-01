@@ -29,19 +29,19 @@
       <button id="btnList" type="button" class="btn btn-primary">Listar</button>
     </div>
 
-    <div id="feedback" style="margin-top:8px; color:#555;"></div>
+    <div id="feedback" class="feedback-msg"></div>
   </div>
 
   <div id="resultsSection" class="centered" style="display:none; margin-top:20px;">
     <table class="table" style="border-collapse:collapse; min-width:700px;">
       <thead>
         <tr>
-          <th style="padding:4px 10px;">#</th>
-          <th style="padding:4px 10px;">Nome</th>
-          <th style="padding:4px 10px;">Tipo</th>
-          <th style="padding:4px 10px;">Jogos</th>
-          <th style="padding:4px 10px;">Data</th>
-          <th style="padding:4px 10px;"></th>
+          <th>#</th>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th>Jogos</th>
+          <th>Data</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="resultsBody"></tbody>
@@ -91,12 +91,12 @@
         var rowId = 'detail-' + idx;
         var row = document.createElement('tr');
         row.innerHTML =
-          '<td style="padding:3px 10px;">' + (idx + 1) + '</td>' +
-          '<td style="padding:3px 10px;">' + (item.alias || '-') + '</td>' +
-          '<td style="padding:3px 10px;">' + item.game_type + '</td>' +
-          '<td style="padding:3px 10px;">' + numGames + '</td>' +
-          '<td style="padding:3px 10px;">' + date + '</td>' +
-          '<td style="padding:3px 10px; white-space:nowrap;">' +
+          '<td>' + (idx + 1) + '</td>' +
+          '<td>' + (item.alias || '-') + '</td>' +
+          '<td>' + item.game_type + '</td>' +
+          '<td>' + numGames + '</td>' +
+          '<td>' + date + '</td>' +
+          '<td style="white-space:nowrap;">' +
             '<button class="btn btn-default btn-sm" onclick="toggleDetail(\'' + rowId + '\', this)" style="margin-right:4px;">Ver jogos</button>' +
             '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'' + item.id + '\')">Excluir</button>' +
           '</td>';
@@ -110,7 +110,7 @@
           return game.map(function(n) { return n < 10 ? '0' + n : '' + n; }).join('  ');
         }).join('<br>');
         detail.innerHTML =
-          '<td colspan="6" style="padding:8px 16px; background:#f8f9fa; font-family:monospace;">' +
+          '<td colspan="6" style="background:#f8f9fa; font-family:monospace; padding:8px 16px;">' +
           (lines || '(sem dados)') + '</td>';
         body.appendChild(detail);
       });
