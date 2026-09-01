@@ -10,18 +10,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newLottoInputDTO(numGames, numEachGame int, fixedNumbers, mostSortedNumbers []int, gameType string) types.LottoInputDTO {
+func newLottoInputDTO(numGames, numEachGame int, fixedNumbers, favoredNumbers []int, gameType string) types.LottoInputDTO {
 	dto := types.LottoInputDTO{
 		NumGames:          &numGames,
 		NumEachGame:       &numEachGame,
 		FixedNumbers:      make([]int, len(fixedNumbers)),
-		MostSortedNumbers: make([]int, len(mostSortedNumbers)),
+		FavoredNumbers: make([]int, len(favoredNumbers)),
 		GameType:          &gameType,
 		Alias:             new(string),
 	}
 
 	copy(dto.FixedNumbers, fixedNumbers)
-	copy(dto.MostSortedNumbers, mostSortedNumbers)
+	copy(dto.FavoredNumbers, favoredNumbers)
 	*dto.Alias = "test"
 
 	return dto
@@ -33,10 +33,10 @@ func TestGenerateLottoCombination_RG_SameGame(t *testing.T) {
 	numGames := 2000
 	numEach := 13
 	fixed := []int{}
-	mostSorted := []int{}
+	favored := []int{}
 	gameType := "Quina-Brasil"
 
-	dto := newLottoInputDTO(numGames, numEach, fixed, mostSorted, gameType)
+	dto := newLottoInputDTO(numGames, numEach, fixed, favored, gameType)
 	input, err := types.NewLottoInput(dto)
 	r.NoError(err)
 

@@ -8,7 +8,7 @@ Um projeto em parceria com meu pai para gerar e gerenciar jogos de loteria brasi
 - **Importa jogos** a partir de um arquivo de texto (um jogo por linha, números separados por vírgula), com validação automática por tipo de jogo
 - **Gera jogos adicionais** a partir de um conjunto já existente, garantindo que os novos jogos não repitam nenhum dos jogos importados nem entre si
 - **Persiste e gerencia** as combinações geradas via API REST (criar, listar, buscar, deletar, conferir resultado)
-- Suporta **números fixos** (presentes em todo jogo) e **números mais sorteados** (com maior probabilidade de aparecer) na geração
+- Suporta **números fixos** (presentes em todo jogo), **números favoritos** (aparecem com mais frequência), **números desfavorecidos** (aparecem com menos frequência) e **números excluídos** (nunca gerados) na geração. A seleção é **adaptativa**: números já muito gerados têm menor probabilidade de ser escolhidos, garantindo uma distribuição equilibrada ao longo do conjunto.
 
 ## Pré-requisitos
 
@@ -66,11 +66,13 @@ Content-Type: application/json
   "num_games": 10,
   "num_each": 15,
   "fixed_numbers": [3, 7],
-  "most_sorted": [1, 5, 12, 20],
+  "favored": [1, 5, 12, 20],
+  "disfavored": [13, 25],
+  "excluded_numbers": [22],
   "alias": "meu-jogo"
 }
 ```
-`fixed_numbers` e `most_sorted` são opcionais. Retorna `201 Created` com o ID no header `Location`.
+`fixed_numbers`, `favored`, `disfavored` e `excluded_numbers` são opcionais. Retorna `201 Created` com o ID no header `Location`.
 
 ### Importar jogos de arquivo
 ```

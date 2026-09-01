@@ -14,7 +14,7 @@ type testCases struct {
 	numGames   int
 	numEach    int
 	fixed      []int
-	mostSorted []int
+	favored []int
 	gameType   string
 	result     []int
 }
@@ -25,15 +25,15 @@ func TestGenerateValidGame_MS_NoRepeatedNumbers(t *testing.T) {
 	numGames := 100
 	numEach := 13
 	fixed := []int{13, 41, 60, 78}
-	mostSorted := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
+	favored := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
 	gameType := "Quina-Brasil"
-	dto := newLottoInputDTO(numGames, numEach, fixed, mostSorted, gameType)
+	dto := newLottoInputDTO(numGames, numEach, fixed, favored, gameType)
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
 	for i := 0; i < maxRepetitions; i++ {
 		counter := make(map[int]bool)
-		rgg := NewMostSortedGenerator(input, nil)
+		rgg := NewWeightedGenerator(input, nil)
 		game := rgg.GenerateValidGame()
 
 		for _, num := range game {
@@ -51,13 +51,13 @@ func TestGenerateLottoCombination_MS(t *testing.T) {
 	numGames := 100
 	numEach := 13
 	fixed := []int{13, 41, 60, 78}
-	mostSorted := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
+	favored := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
 	gameType := "Quina-Brasil"
-	dto := newLottoInputDTO(numGames, numEach, fixed, mostSorted, gameType)
+	dto := newLottoInputDTO(numGames, numEach, fixed, favored, gameType)
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	rgg := NewMostSortedGenerator(input, nil)
+	rgg := NewWeightedGenerator(input, nil)
 	lotto := rgg.GenerateLottoCombination()
 	r.Equal(*dto.NumGames, lotto.Numbers.Rows)
 	r.Equal(*dto.NumEachGame, lotto.Numbers.Columns)
@@ -75,16 +75,16 @@ func TestGenerateLottoCombination_MS_PossibleEntries(t *testing.T) {
 				numGames := 100
 				numEach := 13
 				fixed := []int{13, 41, 62, 78}
-				mostSorted := []int{5, 7, 14, 21, 29, 32, 37, 39, 45, 50, 55, 56, 61, 64, 71, 80}
+				favored := []int{5, 7, 14, 21, 29, 32, 37, 39, 45, 50, 55, 56, 61, 64, 71, 80}
 				gameType := "Quina-Brasil"
 				result := []int{12, 25, 51, 60, 74}
 
 				cur := testCases{
-					name:       fmt.Sprintf("%v games -- %v fixed, %v most sorted", ng*numGames, f, ms),
+					name:       fmt.Sprintf("%v games -- %v fixed, %v favored", ng*numGames, f, ms),
 					numGames:   ng * numGames,
 					numEach:    numEach,
 					fixed:      fixed,
-					mostSorted: mostSorted,
+					favored: favored,
 					gameType:   gameType,
 					result:     result,
 				}
@@ -101,7 +101,7 @@ func TestGenerateLottoCombination_MS_PossibleEntries(t *testing.T) {
 				for !s.IsEmpty() && j < ms {
 					value, err := s.Pop()
 					r.NoError(err)
-					cur.mostSorted[j] = value
+					cur.favored[j] = value
 					j++
 				}
 				cases = append(cases, cur)
@@ -111,11 +111,11 @@ func TestGenerateLottoCombination_MS_PossibleEntries(t *testing.T) {
 	for _, tc := range cases {
 		r := require.New(t)
 		t.Run(tc.name, func(t *testing.T) {
-			dto := newLottoInputDTO(tc.numGames, tc.numEach, tc.fixed, tc.mostSorted, tc.gameType)
+			dto := newLottoInputDTO(tc.numGames, tc.numEach, tc.fixed, tc.favored, tc.gameType)
 			input, err := NewLottoInput(dto)
 			r.NoError(err)
 
-			rgg := NewMostSortedGenerator(input, nil)
+			rgg := NewWeightedGenerator(input, nil)
 			lotto := rgg.GenerateLottoCombination()
 			ans, err := evaluateCombination(lotto, tc.result)
 			r.NoError(err)

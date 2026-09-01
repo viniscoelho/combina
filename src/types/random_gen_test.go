@@ -15,9 +15,9 @@ func TestGenerateValidGame_RG_NoRepeatedNumbers(t *testing.T) {
 	numGames := 100
 	numEach := 13
 	fixed := []int{13, 41, 60, 78}
-	mostSorted := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
+	favored := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
 	gameType := "Quina-Brasil"
-	dto := newLottoInputDTO(numGames, numEach, fixed, mostSorted, gameType)
+	dto := newLottoInputDTO(numGames, numEach, fixed, favored, gameType)
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
@@ -41,9 +41,9 @@ func TestGenerateLottoCombination_RG(t *testing.T) {
 	numGames := 100
 	numEach := 13
 	fixed := []int{13, 41, 60, 78}
-	mostSorted := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
+	favored := []int{5, 7, 12, 21, 25, 32, 37, 39, 45, 51, 55, 56, 61, 64, 74, 80}
 	gameType := "Quina-Brasil"
-	dto := newLottoInputDTO(numGames, numEach, fixed, mostSorted, gameType)
+	dto := newLottoInputDTO(numGames, numEach, fixed, favored, gameType)
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
@@ -72,7 +72,7 @@ func TestGenerateLottoCombination_RG_PossibleEntries(t *testing.T) {
 				numGames:   ng * numGames,
 				numEach:    numEach,
 				fixed:      fixed,
-				mostSorted: []int{},
+				favored: []int{},
 				gameType:   gameType,
 				result:     result,
 			}
@@ -91,7 +91,7 @@ func TestGenerateLottoCombination_RG_PossibleEntries(t *testing.T) {
 	for _, tc := range cases {
 		r := require.New(t)
 		t.Run(tc.name, func(t *testing.T) {
-			dto := newLottoInputDTO(tc.numGames, tc.numEach, tc.fixed, tc.mostSorted, tc.gameType)
+			dto := newLottoInputDTO(tc.numGames, tc.numEach, tc.fixed, tc.favored, tc.gameType)
 			input, err := NewLottoInput(dto)
 			r.NoError(err)
 

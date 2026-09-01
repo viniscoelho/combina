@@ -24,7 +24,9 @@ type generateFromDTO struct {
 	ExistingGames     [][]int `json:"existing_games"`
 	CarryGames        [][]int `json:"carry_games,omitempty"`
 	FixedNumbers      []int   `json:"fixed_numbers,omitempty"`
-	MostSortedNumbers []int   `json:"most_sorted,omitempty"`
+	FavoredNumbers []int   `json:"favored,omitempty"`
+	DisfavoredNumbers []int   `json:"disfavored,omitempty"`
+	ExcludedNumbers   []int   `json:"excluded_numbers,omitempty"`
 	SaveImported      *bool   `json:"save_imported,omitempty"`
 	Alias             *string `json:"alias,omitempty"`
 }
@@ -59,7 +61,9 @@ func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		NumGames:          dto.NumGames,
 		NumEachGame:       dto.NumEach,
 		FixedNumbers:      dto.FixedNumbers,
-		MostSortedNumbers: dto.MostSortedNumbers,
+		FavoredNumbers: dto.FavoredNumbers,
+		DisfavoredNumbers: dto.DisfavoredNumbers,
+		ExcludedNumbers:   dto.ExcludedNumbers,
 		GameType:          dto.GameType,
 		Alias:             &alias,
 	}
@@ -85,8 +89,8 @@ func (h generateFrom) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	seed = append(seed, dto.CarryGames...)
 
 	var rgg types.GameGenerator
-	if len(lottoInput.MostSortedNumbers) != 0 {
-		rgg = types.NewMostSortedGenerator(lottoInput, seed)
+	if len(lottoInput.FavoredNumbers) != 0 || len(lottoInput.DisfavoredNumbers) != 0 {
+		rgg = types.NewWeightedGenerator(lottoInput, seed)
 	} else {
 		rgg = types.NewRandomGameGenerator(lottoInput, seed)
 	}

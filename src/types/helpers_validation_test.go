@@ -148,26 +148,42 @@ func TestValidateIntersection(t *testing.T) {
 	cases := []struct {
 		name       string
 		fixed      []int
-		mostSorted []int
+		excluded   []int
+		favored    []int
+		disfavored []int
 		wantErr    bool
 	}{
-		{"both empty no error", []int{}, []int{}, false},
-		{"no overlap no error", []int{1, 2, 3}, []int{4, 5, 6}, false},
-		{"fixed longer no overlap no error", []int{1, 2, 3, 4}, []int{5, 6}, false},
-		{"mostSorted longer no overlap no error", []int{1, 2}, []int{3, 4, 5, 6}, false},
+		// all empty
+		{"all empty no error", nil, nil, nil, nil, false},
 
-		{"overlap fixed <= mostSorted", []int{1, 5}, []int{5, 10, 15}, true},
-		{"overlap fixed > mostSorted", []int{1, 2, 3, 4, 5}, []int{5}, true},
-		{"overlap equal length", []int{1, 2, 3}, []int{3, 4, 5}, true},
-		{"overlap multiple shared", []int{1, 3, 5}, []int{5, 3, 7}, true},
+		// no overlap across all four lists
+		{"all four no overlap", []int{1, 2}, []int{3, 4}, []int{5, 6}, []int{7, 8}, false},
 
-		{"fixed empty mostSorted non-empty no error", []int{}, []int{1, 2, 3}, false},
-		{"fixed non-empty mostSorted empty no error", []int{1, 2, 3}, []int{}, false},
+		// fixed vs others
+		{"fixed vs excluded", []int{1, 2}, []int{2, 3}, nil, nil, true},
+		{"fixed vs favored", []int{1, 5}, []int{}, []int{5, 10}, nil, true},
+		{"fixed vs disfavored", []int{1, 5}, nil, nil, []int{5, 10}, true},
+
+		// excluded vs others
+		{"excluded vs favored", nil, []int{3, 7}, []int{7, 9}, nil, true},
+		{"excluded vs disfavored", nil, []int{3, 7}, nil, []int{7, 9}, true},
+
+		// favored vs disfavored
+		{"favored vs disfavored", nil, nil, []int{1, 2, 3}, []int{3, 4, 5}, true},
+
+		// single-element lists
+		{"single element no overlap", []int{1}, []int{2}, []int{3}, []int{4}, false},
+		{"single element overlap fixed excluded", []int{5}, []int{5}, nil, nil, true},
+
+		// partial population
+		{"only fixed and favored no overlap", []int{1, 2, 3}, nil, []int{4, 5, 6}, nil, false},
+		{"only favored and disfavored no overlap", nil, nil, []int{1, 2}, []int{3, 4}, false},
+		{"only excluded no error", nil, []int{10, 20}, nil, nil, false},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := validateIntersection(tc.fixed, tc.mostSorted)
+			err := validateWeightedIntersection(tc.fixed, tc.excluded, tc.favored, tc.disfavored)
 			if tc.wantErr {
 				require.Error(t, err)
 				var target InvalidDTOError

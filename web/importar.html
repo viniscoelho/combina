@@ -90,11 +90,31 @@
 
     <div class="div-table-row">
       <div class="div-table-col-a">
-        <strong>Números mais sorteados (opcional):</strong>
+        <strong>Números favoritos (opcional):</strong>
         <span style="font-size:13px; color:#666;">(aparecem com mais frequência)</span>
       </div>
       <div class="div-table-col-b">
-        <input id="mostSorted" type="text" placeholder="ex: 5, 9, 21" class="form-control input-width at-right" />
+        <input id="favored" type="text" placeholder="ex: 5, 9, 21" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Números desfavorecidos (opcional):</strong>
+        <span style="font-size:13px; color:#666;">(aparecem com menos frequência)</span>
+      </div>
+      <div class="div-table-col-b">
+        <input id="disfavored" type="text" placeholder="ex: 1, 3, 25" class="form-control input-width at-right" />
+      </div>
+    </div>
+
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Números excluídos (opcional):</strong>
+        <span style="font-size:13px; color:#666;">(nunca serão gerados)</span>
+      </div>
+      <div class="div-table-col-b">
+        <input id="excludedNumbers" type="text" placeholder="ex: 13, 25" class="form-control input-width at-right" />
       </div>
     </div>
 
@@ -230,7 +250,9 @@
       var saveImported = document.getElementById('saveImported').checked;
       var appendMode   = document.getElementById('appendMode').checked;
       var fixedNumbers = parseNumberList(document.getElementById('fixedNumbers').value);
-      var mostSorted   = parseNumberList(document.getElementById('mostSorted').value);
+      var favored = parseNumberList(document.getElementById('favored').value);
+      var disfavored = parseNumberList(document.getElementById('disfavored').value);
+      var excludedNumbers = parseNumberList(document.getElementById('excludedNumbers').value);
 
       if (!numGames || numGames < 1) {
         document.getElementById('generateFeedback').innerText = 'Informe a quantidade de jogos.';
@@ -255,9 +277,11 @@
         num_each:       numEach,
         existing_games: loadedGames,
         carry_games:    carry,
-        fixed_numbers:  fixedNumbers,
-        most_sorted:    mostSorted,
-        save_imported:  saveImported,
+        fixed_numbers:    fixedNumbers,
+        favored:    favored,
+        disfavored: disfavored,
+        excluded_numbers: excludedNumbers,
+        save_imported:    saveImported,
         alias:          alias
       });
 

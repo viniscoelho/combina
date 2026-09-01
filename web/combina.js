@@ -1,10 +1,10 @@
 $(document).ready(function(){
   function getFormData($form){
     var rawForm = $form.serializeArray();
-    var formAsJson = {fixed_numbers: [], most_sorted: []};
+    var formAsJson = {fixed_numbers: [], favored: [], disfavored: [], excluded_numbers: []};
 
     $.map(rawForm, function(f, i){
-      if (f['name'] == "fixed_numbers" || f['name'] == "most_sorted") {
+      if (f['name'] == "fixed_numbers" || f['name'] == "favored" || f['name'] == "disfavored" || f['name'] == "excluded_numbers") {
         var raw = f['value'].trim();
         if (raw === '') {
           formAsJson[f['name']] = [];
@@ -20,6 +20,14 @@ $(document).ready(function(){
         formAsJson[f['name']] = Number(f['value']);
       } else {
         formAsJson[f['name']] = f['value'];
+      }
+    });
+
+    // Remove array fields that are empty so omitempty on the backend skips them
+    // and avoids unmarshal errors if a stale form sends "" instead of [].
+    ['fixed_numbers', 'favored', 'disfavored', 'excluded_numbers'].forEach(function(k) {
+      if (Array.isArray(formAsJson[k]) && formAsJson[k].length === 0) {
+        delete formAsJson[k];
       }
     });
 

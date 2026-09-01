@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 // IsNumEachValid validates if the amount of picked numbers
 // is valid according to the official lottery rules
 func IsNumEachValid(numEachGame int, gameType string) bool {
@@ -75,29 +77,31 @@ func isValidNumGames(numGames int64, maxRange, numEachGame, numFixed int) bool {
 	return numGames <= nCr
 }
 
-func validateIntersection(fixedNumbers, mostSortedNumbers []int) error {
-	h := make(map[int]bool)
-	if len(fixedNumbers) <= len(mostSortedNumbers) {
-		for _, num := range fixedNumbers {
-			h[num] = true
-		}
-		for _, num := range mostSortedNumbers {
-			if _, ok := h[num]; ok {
-				return InvalidDTOError{Message: "a fixed number cannot be a most sorted at same time or vice-versa"}
-			}
-		}
-
-	} else {
-		for _, num := range mostSortedNumbers {
-			h[num] = true
-		}
-		for _, num := range fixedNumbers {
-			if _, ok := h[num]; ok {
-				return InvalidDTOError{Message: "a fixed number cannot be a most sorted at same time or vice-versa"}
-			}
-		}
+// validateWeightedIntersection ensures no number appears in more than one of
+// the four classification lists: fixed, excluded, favored, disfavored.
+func validateWeightedIntersection(fixed, excluded, favored, disfavored []int) error {
+	seen := make(map[int]string, len(fixed)+len(excluded)+len(favored)+len(disfavored))
+	for _, n := range fixed {
+		seen[n] = "fixed"
 	}
-
+	for _, n := range excluded {
+		if l, ok := seen[n]; ok {
+			return InvalidDTOError{Message: fmt.Sprintf("number %d appears in both excluded and %s", n, l)}
+		}
+		seen[n] = "excluded"
+	}
+	for _, n := range favored {
+		if l, ok := seen[n]; ok {
+			return InvalidDTOError{Message: fmt.Sprintf("number %d appears in both favored and %s", n, l)}
+		}
+		seen[n] = "favored"
+	}
+	for _, n := range disfavored {
+		if l, ok := seen[n]; ok {
+			return InvalidDTOError{Message: fmt.Sprintf("number %d appears in both disfavored and %s", n, l)}
+		}
+		seen[n] = "disfavored"
+	}
 	return nil
 }
 
@@ -119,8 +123,8 @@ func validateInputDTO(dto LottoInputDTO) error {
 	}
 
 	r := Games[*dto.GameType]
-	if len(dto.MostSortedNumbers) > r.Max-len(dto.FixedNumbers) {
-		return InvalidDTOError{Message: "amount of most sorted numbers cannot be greater than remaining numbers"}
+	if len(dto.FavoredNumbers) > r.Max-len(dto.FixedNumbers) {
+		return InvalidDTOError{Message: "amount of favored numbers cannot be greater than remaining numbers"}
 	}
 
 	if !IsNumEachValid(*dto.NumEachGame, *dto.GameType) {
@@ -131,15 +135,29 @@ func validateInputDTO(dto LottoInputDTO) error {
 		return InvalidDTOError{Message: "some fixed numbers are invalid -- choose numbers within a valid range"}
 	}
 
-	if !isValidNumbers(r, dto.MostSortedNumbers) {
-		return InvalidDTOError{Message: "some most sorted numbers are invalid -- choose numbers within a valid range"}
+	if !isValidNumbers(r, dto.FavoredNumbers) {
+		return InvalidDTOError{Message: "some favored numbers are invalid -- choose numbers within a valid range"}
+	}
+
+	if !isValidNumbers(r, dto.DisfavoredNumbers) {
+		return InvalidDTOError{Message: "some disfavored numbers are invalid -- choose numbers within a valid range"}
+	}
+
+	if !isValidNumbers(r, dto.ExcludedNumbers) {
+		return InvalidDTOError{Message: "some excluded numbers are invalid -- choose numbers within a valid range"}
+	}
+
+	available := r.Max - r.Min + 1 - len(dto.FixedNumbers) - len(dto.ExcludedNumbers)
+	need := *dto.NumEachGame - len(dto.FixedNumbers)
+	if available < need {
+		return InvalidDTOError{Message: "too many excluded numbers -- not enough numbers left to fill a game"}
 	}
 
 	if !isValidNumGames(int64(*dto.NumGames), r.Max, *dto.NumEachGame, len(dto.FixedNumbers)) {
 		return InvalidDTOError{Message: "number of games is invalid -- use another value or change the amount of fixed numbers"}
 	}
 
-	if err := validateIntersection(dto.FixedNumbers, dto.MostSortedNumbers); err != nil {
+	if err := validateWeightedIntersection(dto.FixedNumbers, dto.ExcludedNumbers, dto.FavoredNumbers, dto.DisfavoredNumbers); err != nil {
 		return err
 	}
 

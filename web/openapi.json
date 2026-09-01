@@ -235,10 +235,20 @@
             "items": { "type": "integer" },
             "description": "Numbers that must appear in every game"
           },
-          "most_sorted": {
+          "favored": {
             "type": "array",
             "items": { "type": "integer" },
             "description": "Numbers that are favored (7:3 probability ratio) when non-empty"
+          },
+          "disfavored": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that appear less frequently (0.1x weight)"
+          },
+          "excluded_numbers": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that must never appear in any generated game"
           },
           "game_type": { "type": "string", "example": "Lotofacil" },
           "alias": { "type": "string", "example": "meus jogos" }
@@ -255,6 +265,26 @@
             "type": "array",
             "items": { "type": "array", "items": { "type": "integer" } },
             "description": "Games previously imported; stored alongside the generated ones"
+          },
+          "fixed_numbers": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that must appear in every game"
+          },
+          "favored": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that are favored (7:3 probability ratio) when non-empty"
+          },
+          "disfavored": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that appear less frequently (0.1x weight)"
+          },
+          "excluded_numbers": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Numbers that must never appear in any generated game"
           },
           "alias": { "type": "string", "example": "meus jogos" }
         }

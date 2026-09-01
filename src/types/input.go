@@ -14,7 +14,9 @@ func NewLottoInput(dto LottoInputDTO) (LottoInput, error) {
 		NumGames:          *dto.NumGames,
 		NumEachGame:       *dto.NumEachGame,
 		FixedNumbers:      dto.FixedNumbers,
-		MostSortedNumbers: dto.MostSortedNumbers,
+		FavoredNumbers: dto.FavoredNumbers,
+		DisfavoredNumbers: dto.DisfavoredNumbers,
+		ExcludedNumbers:   dto.ExcludedNumbers,
 		GameType:          *dto.GameType,
 		Alias:             *dto.Alias,
 	}

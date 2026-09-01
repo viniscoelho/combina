@@ -67,7 +67,7 @@ func TestRGG_GenerateCombination_AllDistinct(t *testing.T) {
 	}
 }
 
-// ---- mostSortedGenerator.GenerateCombination ----
+// ---- weightedGenerator.GenerateCombination ----
 
 func TestFY_GenerateCombination_CorrectLength(t *testing.T) {
 	r := require.New(t)
@@ -76,7 +76,7 @@ func TestFY_GenerateCombination_CorrectLength(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
+	fy := NewWeightedGenerator(input, nil)
 	combo := fy.GenerateCombination()
 	r.NotNil(combo)
 
@@ -91,11 +91,18 @@ func TestFY_GenerateCombination_ReturnsNilWhenPoolTooSmall(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
+	fy := NewWeightedGenerator(input, nil)
 
-	// need = 13 - 4 = 9; shrink both pools so their combined size < 9
-	fy.mostSortedNumbers = []int{1, 2, 3}
-	fy.remainingNumbers = []int{4, 5}
+	// need = 13 - 4 = 9; zero out all but 8 entries so pool < need
+	need := input.NumEachGame - len(input.FixedNumbers)
+	zeroed := 0
+	for k := range fy.repeated {
+		if len(fy.repeated)-zeroed <= need-1 {
+			break
+		}
+		fy.repeated[k] = 0
+		zeroed++
+	}
 
 	combo := fy.GenerateCombination()
 	r.Nil(combo)
@@ -109,7 +116,7 @@ func TestFY_GenerateCombination_AllDistinct(t *testing.T) {
 	r.NoError(err)
 
 	for i := 0; i < 500; i++ {
-		fy := NewMostSortedGenerator(input, nil)
+		fy := NewWeightedGenerator(input, nil)
 		combo := fy.GenerateCombination()
 		r.NotNil(combo)
 
@@ -121,61 +128,89 @@ func TestFY_GenerateCombination_AllDistinct(t *testing.T) {
 	}
 }
 
-func TestFY_GenerateCombination_OnlyMostSortedWhenRemainingEmpty(t *testing.T) {
+func TestFY_GenerateCombination_FavoredAppearsMoreThanNeutral(t *testing.T) {
 	r := require.New(t)
 
-	// 4 fixed, need 9 picks; supply exactly 9 mostSorted and no remaining
+	// favored=[2,4,6,8,10], neutral=rest; over many games favored should appear more
 	fixed := []int{13, 41, 60, 78}
-	mostSorted := []int{2, 4, 6, 8, 10, 14, 16, 18, 20}
-	dto := newLottoInputDTO(10, 13, fixed, mostSorted, "Quina-Brasil")
+	favored := []int{2, 4, 6, 8, 10}
+	dto := newLottoInputDTO(200, 13, fixed, favored, "Quina-Brasil")
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
-	fy.remainingNumbers = []int{}
+	fy := NewWeightedGenerator(input, nil)
+	lotto := fy.GenerateLottoCombination()
 
-	msSet := make(map[int]bool, len(mostSorted))
-	for _, n := range mostSorted {
-		msSet[n] = true
-	}
-
-	for i := 0; i < 100; i++ {
-		fy2 := NewMostSortedGenerator(input, nil)
-		fy2.remainingNumbers = []int{}
-		combo := fy2.GenerateCombination()
-		r.NotNil(combo)
-		for _, n := range combo {
-			r.True(msSet[n], "number %d not in mostSorted set", n)
+	freq := map[int]int{}
+	for _, game := range lotto.Numbers.Combination {
+		for _, n := range game {
+			freq[n]++
 		}
 	}
+
+	favoredTotal := 0
+	for _, n := range favored {
+		favoredTotal += freq[n]
+	}
+	neutralTotal := 0
+	neutralCount := 0
+	for n := 1; n <= 80; n++ {
+		isFav := false
+		for _, f := range favored {
+			if f == n {
+				isFav = true
+				break
+			}
+		}
+		isFixed := false
+		for _, f := range fixed {
+			if f == n {
+				isFixed = true
+				break
+			}
+		}
+		if !isFav && !isFixed {
+			neutralTotal += freq[n]
+			neutralCount++
+		}
+	}
+	favoredAvg := float64(favoredTotal) / float64(len(favored))
+	neutralAvg := float64(neutralTotal) / float64(neutralCount)
+	r.Greater(favoredAvg, neutralAvg, "favored avg %.1f should exceed neutral avg %.1f", favoredAvg, neutralAvg)
 }
 
-func TestFY_GenerateCombination_OnlyRemainingWhenMostSortedEmpty(t *testing.T) {
+func TestFY_GenerateCombination_NeutralNumbersEvenDistribution(t *testing.T) {
 	r := require.New(t)
 
-	// k=0 (no mostSorted); all picks come from remaining
-	fixed := []int{13, 41, 60, 78}
-	dto := newLottoInputDTO(10, 13, fixed, []int{}, "Quina-Brasil")
+	// no favored/disfavored — adaptive weighting should produce even spread
+	dto := newLottoInputDTO(150, 15, []int{}, []int{}, "Lotofacil")
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
-	remainSet := make(map[int]bool, len(fy.remainingNumbers))
-	for _, n := range fy.remainingNumbers {
-		remainSet[n] = true
-	}
+	fy := NewWeightedGenerator(input, nil)
+	lotto := fy.GenerateLottoCombination()
 
-	for i := 0; i < 100; i++ {
-		fy2 := NewMostSortedGenerator(input, nil)
-		combo := fy2.GenerateCombination()
-		r.NotNil(combo)
-		for _, n := range combo {
-			r.True(remainSet[n], "number %d not in remaining set", n)
+	freq := map[int]int{}
+	for _, game := range lotto.Numbers.Combination {
+		for _, n := range game {
+			freq[n]++
 		}
 	}
+
+	min, max := 1<<31-1, 0
+	for n := 1; n <= 25; n++ {
+		if freq[n] < min {
+			min = freq[n]
+		}
+		if freq[n] > max {
+			max = freq[n]
+		}
+	}
+	spread := max - min
+	r.LessOrEqual(spread, 10, "frequency spread %d (min=%d max=%d) should be ≤10", spread, min, max)
 }
 
-// ---- mostSortedGenerator.isValidGame ----
+// ---- weightedGenerator.isValidGame ----
 
 func TestFY_IsValidGame_ReturnsTrueWhenAllRepeatedPositive(t *testing.T) {
 	r := require.New(t)
@@ -184,7 +219,7 @@ func TestFY_IsValidGame_ReturnsTrueWhenAllRepeatedPositive(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
+	fy := NewWeightedGenerator(input, nil)
 	// All numbers in repeated have budget > 0 after initialize
 	numbers := []int{2, 4, 6, 8, 10}
 	for _, n := range numbers {
@@ -200,7 +235,7 @@ func TestFY_IsValidGame_ReturnsFalseWhenAnyRepeatedZeroOrNegative(t *testing.T) 
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
+	fy := NewWeightedGenerator(input, nil)
 	numbers := []int{2, 4, 6, 8, 10}
 	for _, n := range numbers {
 		fy.repeated[n] = 3
@@ -217,7 +252,7 @@ func TestFY_IsValidGame_ReturnsFalseWhenRepeatedNegative(t *testing.T) {
 	input, err := NewLottoInput(dto)
 	r.NoError(err)
 
-	fy := NewMostSortedGenerator(input, nil)
+	fy := NewWeightedGenerator(input, nil)
 	numbers := []int{2, 4, 6}
 	for _, n := range numbers {
 		fy.repeated[n] = 1

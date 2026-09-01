@@ -11,7 +11,9 @@ type LottoInput struct {
 	NumGames          int
 	NumEachGame       int
 	FixedNumbers      []int
-	MostSortedNumbers []int
+	FavoredNumbers []int
+	DisfavoredNumbers []int
+	ExcludedNumbers   []int
 	GameType          string
 	Alias             string
 }
@@ -20,7 +22,9 @@ type LottoInputDTO struct {
 	NumGames          *int    `json:"num_games"`
 	NumEachGame       *int    `json:"num_each"`
 	FixedNumbers      []int   `json:"fixed_numbers"`
-	MostSortedNumbers []int   `json:"most_sorted"`
+	FavoredNumbers    []int   `json:"favored,omitempty"`
+	DisfavoredNumbers []int   `json:"disfavored,omitempty"`
+	ExcludedNumbers   []int   `json:"excluded_numbers,omitempty"`
 	GameType          *string `json:"game_type"`
 	Alias             *string `json:"alias,omitempty"`
 }
