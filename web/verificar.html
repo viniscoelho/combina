@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+
+<script type="text/javascript" src="common/header.js"></script>
+
+<body>
+  <script type="text/javascript" src="common/menu.js"></script>
+
+  <!-- Step 1: load saved combinations -->
+  <div class="centered">
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Filtrar por tipo de jogo:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="gameType" class="form-control input-width at-right">
+          <option value="">Todos</option>
+          <option value="Lotofacil">Lotofácil</option>
+          <option value="Mega-Sena">Mega-Sena</option>
+          <option value="Quina">Quina</option>
+          <option value="Lotomania">Lotomania</option>
+          <option value="Quina-Brasil">Quina Brasil</option>
+          <option value="Quininha">Quininha</option>
+          <option value="Seninha">Seninha</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="btnLoad" type="button" class="btn btn-primary">Carregar jogos</button>
+    </div>
+    <div id="loadFeedback" class="feedback-msg"></div>
+  </div>
+
+  <!-- Step 2: pick a combination -->
+  <div id="selectSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Selecione o conjunto:</strong>
+      </div>
+      <div class="div-table-col-b">
+        <select id="comboSelect" class="form-control at-right" style="width:280px;"></select>
+      </div>
+    </div>
+
+    <div class="buttons" style="margin-top:6px;">
+      <button id="btnVerify" type="button" class="btn btn-warning">Verificar sobreposições</button>
+    </div>
+    <div id="verifyFeedback" class="feedback-msg"></div>
+  </div>
+
+  <!-- Step 3: overlap results -->
+  <div id="overlapSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <h4 style="margin-bottom:10px;">Resultado da verificação</h4>
+    <div id="overlapSummary" class="feedback-msg" style="margin-bottom:10px;"></div>
+    <table id="overlapTable" class="table" style="border-collapse:collapse; min-width:620px; display:none;">
+      <thead>
+        <tr>
+          <th>Jogo A</th>
+          <th>Jogo B</th>
+          <th>Relação</th>
+          <th>Números compartilhados</th>
+          <th>Qtd</th>
+        </tr>
+      </thead>
+      <tbody id="overlapBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Step 4: add a new set -->
+  <div id="addSetSection" class="centered" style="display:none; margin-top:20px;">
+    <hr />
+    <h4 style="margin-bottom:10px;">Adicionar jogo ao conjunto</h4>
+    <div class="div-table-row">
+      <div class="div-table-col-a">
+        <strong>Números (separados por vírgula):</strong>
+      </div>
+      <div class="div-table-col-b">
+        <input id="newSetNumbers" type="text" class="form-control at-right"
+               placeholder="ex: 1,5,12,23,45" style="width:240px;" />
+      </div>
+    </div>
+    <div class="buttons" style="margin-top:6px;">
+      <button id="btnAddSet" type="button" class="btn btn-success">Adicionar jogo</button>
+    </div>
+    <div id="addFeedback" class="feedback-msg"></div>
+
+    <!-- overlap results for the newly added set -->
+    <div id="addOverlapSection" style="display:none; margin-top:14px;">
+      <div id="addOverlapSummary" class="feedback-msg" style="margin-bottom:8px;"></div>
+      <table id="addOverlapTable" class="table" style="border-collapse:collapse; min-width:620px; display:none;">
+        <thead>
+          <tr>
+            <th>Novo jogo</th>
+            <th>Jogo existente</th>
+            <th>Relação</th>
+            <th>Números compartilhados</th>
+            <th>Qtd</th>
+          </tr>
+        </thead>
+        <tbody id="addOverlapBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var combos = [];
+    var currentCombo = null;
+
+    var relationLabels = {
+      'equal':     'Igual',
+      'subset':    'A ⊂ B (subconjunto)',
+      'superset':  'A ⊃ B (superconjunto)',
+      'partial':   'Parcial'
+    };
+
+    document.getElementById('btnLoad').addEventListener('click', function () {
+      var gameType = document.getElementById('gameType').value;
+      var url = 'http://localhost:3000/combinations';
+      if (gameType) url += '?type=' + encodeURIComponent(gameType);
+
+      document.getElementById('loadFeedback').innerText = 'Carregando...';
+      document.getElementById('selectSection').style.display = 'none';
+      document.getElementById('overlapSection').style.display = 'none';
+      document.getElementById('addSetSection').style.display = 'none';
+
+      $.ajax({
+        beforeSend: function (req) { req.setRequestHeader('Accept', 'application/json'); },
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          if (!data || data.length === 0) {
+            document.getElementById('loadFeedback').innerText = 'Nenhum conjunto encontrado.';
+            return;
+          }
+          combos = data;
+          document.getElementById('loadFeedback').innerText = data.length + ' conjunto(s) carregado(s).';
+          var sel = document.getElementById('comboSelect');
+          sel.innerHTML = '';
+          data.forEach(function (item) {
+            var label = (item.alias || item.id) + ' — ' + item.game_type +
+                        ' (' + (item.numbers && item.numbers.rows ? item.numbers.rows : '?') + ' jogos)';
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = label;
+            sel.appendChild(opt);
+          });
+          document.getElementById('selectSection').style.display = '';
+        },
+        error: function (xhr) {
+          document.getElementById('loadFeedback').innerText = friendlyError(xhr, 'Erro ao carregar jogos.');
+        }
+      });
+    });
+
+    document.getElementById('btnVerify').addEventListener('click', function () {
+      var id = document.getElementById('comboSelect').value;
+      document.getElementById('verifyFeedback').innerText = 'Verificando...';
+      document.getElementById('overlapSection').style.display = 'none';
+      document.getElementById('addSetSection').style.display = 'none';
+
+      $.ajax({
+        beforeSend: function (req) { req.setRequestHeader('Accept', 'application/json'); },
+        url: 'http://localhost:3000/combinations/' + encodeURIComponent(id) + '/overlaps',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          document.getElementById('verifyFeedback').innerText = '';
+          currentCombo = combos.find(function (c) { return c.id === id; });
+          renderOverlapReport(data, 'overlapSummary', 'overlapBody', 'overlapTable');
+          document.getElementById('overlapSection').style.display = '';
+          document.getElementById('addSetSection').style.display = '';
+          document.getElementById('addFeedback').innerText = '';
+          document.getElementById('addOverlapSection').style.display = 'none';
+          document.getElementById('newSetNumbers').value = '';
+        },
+        error: function (xhr) {
+          document.getElementById('verifyFeedback').innerText = friendlyError(xhr, 'Erro ao verificar.');
+        }
+      });
+    });
+
+    document.getElementById('btnAddSet').addEventListener('click', function () {
+      if (!currentCombo) return;
+      var raw = document.getElementById('newSetNumbers').value.trim();
+      if (!raw) {
+        document.getElementById('addFeedback').innerText = 'Informe os números.';
+        return;
+      }
+
+      var parts = raw.split(',');
+      var numbers = [];
+      for (var i = 0; i < parts.length; i++) {
+        var n = parseInt(parts[i].trim());
+        if (isNaN(n)) {
+          document.getElementById('addFeedback').innerText = 'Número inválido: "' + parts[i].trim() + '"';
+          return;
+        }
+        numbers.push(n);
+      }
+
+      document.getElementById('addFeedback').innerText = 'Adicionando...';
+      document.getElementById('addOverlapSection').style.display = 'none';
+
+      $.ajax({
+        beforeSend: function (req) { req.setRequestHeader('Accept', 'application/json'); req.setRequestHeader('Content-Type', 'application/json'); },
+        url: 'http://localhost:3000/combinations/' + encodeURIComponent(currentCombo.id) + '/sets',
+        type: 'POST',
+        data: JSON.stringify({ numbers: numbers }),
+        dataType: 'json',
+        success: function (data) {
+          document.getElementById('addFeedback').innerText =
+            'Jogo adicionado (índice ' + data.set_index + ').';
+          document.getElementById('newSetNumbers').value = '';
+
+          // update local combo row count for display
+          currentCombo.numbers.rows = data.set_index + 1;
+          var sel = document.getElementById('comboSelect');
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === currentCombo.id) {
+              sel.options[i].innerText = (currentCombo.alias || currentCombo.id) +
+                ' — ' + currentCombo.game_type +
+                ' (' + currentCombo.numbers.rows + ' jogos)';
+              break;
+            }
+          }
+
+          renderOverlapReport(data.overlap, 'addOverlapSummary', 'addOverlapBody', 'addOverlapTable');
+          document.getElementById('addOverlapSection').style.display = '';
+        },
+        error: function (xhr) {
+          document.getElementById('addFeedback').innerText = friendlyError(xhr, 'Erro ao adicionar jogo.');
+        }
+      });
+    });
+
+    function renderOverlapReport(report, summaryId, bodyId, tableId) {
+      var summary = document.getElementById(summaryId);
+      var body    = document.getElementById(bodyId);
+      var table   = document.getElementById(tableId);
+
+      body.innerHTML = '';
+
+      if (report.clean || !report.findings || report.findings.length === 0) {
+        summary.innerHTML = '<span style="color:#28a745; font-weight:bold;">Nenhuma sobreposição encontrada.</span>';
+        table.style.display = 'none';
+        return;
+      }
+
+      summary.innerHTML = '<span style="color:#dc3545; font-weight:bold;">' +
+        report.findings.length + ' sobreposição(ões) encontrada(s).</span>';
+
+      report.findings.forEach(function (f) {
+        var sharedStr = f.shared_numbers
+          .map(function (n) { return n < 10 ? '0' + n : '' + n; })
+          .join(', ');
+        var rowStyle = f.relation === 'equal' ? 'background:#ffeeba;' :
+                       (f.relation === 'subset' || f.relation === 'superset') ? 'background:#f8d7da;' : '';
+        var row = document.createElement('tr');
+        row.style.cssText = rowStyle;
+        row.innerHTML =
+          '<td>' + (f.set_a + 1) + '</td>' +
+          '<td>' + (f.set_b + 1) + '</td>' +
+          '<td>' + (relationLabels[f.relation] || f.relation) + '</td>' +
+          '<td style="font-family:monospace;">' + sharedStr + '</td>' +
+          '<td>' + f.shared_count + '</td>';
+        body.appendChild(row);
+      });
+
+      table.style.display = '';
+    }
+  </script>
+
+  <script type="text/javascript" src="common/errors.js"></script>
+  <script type="text/javascript" src="common/footer.js"></script>
+</body>
+
+</html>

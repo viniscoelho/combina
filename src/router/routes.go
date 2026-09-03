@@ -39,6 +39,14 @@ func CreateRoutes(cb types.LottoCombinator) *mux.Router {
 		Methods(http.MethodGet).
 		Name("EvaluateCombination").
 		Handler(routes.NewEvaluateComboHandler(cb))
+	r.Path("/combinations/{id}/sets").
+		Methods(http.MethodPost).
+		Name("AddSet").
+		Handler(routes.NewAddSetHandler(cb))
+	r.Path("/combinations/{id}/overlaps").
+		Methods(http.MethodGet).
+		Name("OverlapCheck").
+		Handler(routes.NewOverlapHandler(cb))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web")))
 

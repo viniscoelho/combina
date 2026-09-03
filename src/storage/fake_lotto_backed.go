@@ -49,6 +49,15 @@ func (lb *fakeLottoBacked) AddCombination(lotto types.Lotto) error {
 	return nil
 }
 
+func (lb *fakeLottoBacked) UpdateCombination(lotto types.Lotto) error {
+	if _, ok := lb.storage[lotto.ID]; !ok {
+		return types.CombinationDoesNotExistError{}
+	}
+
+	lb.storage[lotto.ID] = lotto
+	return nil
+}
+
 func (lb fakeLottoBacked) FetchCombination(id string) (types.Lotto, error) {
 	l, ok := lb.storage[id]
 	if !ok {

@@ -114,6 +114,31 @@ func (lb *lottoBacked) AddCombination(lotto types.Lotto) error {
 	return nil
 }
 
+func (lb *lottoBacked) UpdateCombination(lotto types.Lotto) error {
+	if _, ok := lb.storage[lotto.ID]; !ok {
+		return types.CombinationDoesNotExistError{}
+	}
+
+	bytes, err := json.Marshal(lotto.Numbers)
+	if err != nil {
+		return fmt.Errorf("marshal failed: %w", err)
+	}
+
+	conn, err := db.DatabaseConnect(types.DatabaseName)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	_, err = conn.Exec(context.Background(), "UPDATE lotto SET combination = $1 WHERE id = $2", bytes, lotto.ID)
+	if err != nil {
+		return fmt.Errorf("update failed: %w", err)
+	}
+
+	lb.storage[lotto.ID] = lotto
+	return nil
+}
+
 func (lb lottoBacked) FetchCombination(id string) (types.Lotto, error) {
 	l, ok := lb.storage[id]
 	if !ok {

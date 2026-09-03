@@ -9,6 +9,7 @@ document.write(`
         <td><a href='importar.html'>Importar jogos</a></td>
         <td><a href='listar.html'>Listar jogos</a></td>
         <td><a href='conferir.html'>Conferir jogos</a></td>
+        <td><a href='verificar.html'>Verificar sobreposição</a></td>
         <td><a href='creditos.html'>Créditos</a></td>
         <td><a href='api-docs.html'>API Docs</a></td>
       </tr>
